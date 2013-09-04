@@ -1,0 +1,32 @@
+{
+  "name": "spatester",
+  "version": "0.0.1",
+  "description": "Single Page App tester",
+  "main": "src/testSuite.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:viareport/spatester.git"
+  },
+  "keywords": [
+    "test",
+    "framework",
+    "javascript",
+    "singlepageapp"
+  ],
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-bumpup": "~0.2.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.1.2",
+    "grunt-contrib-jshint": "~0.3.0",
+    "grunt-contrib-watch": "~0.5.3"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "author": {
+    "name": "Nicolas Medda",
+    "email": "nmedda@viareport.com"
+  },
+  "license": "BSD"
+}
