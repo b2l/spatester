@@ -1,9 +1,6 @@
 module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-bumpup');
 
     // Project configuration.
@@ -14,5 +11,5 @@ module.exports = function(grunt) {
         bumpup: ['package.json']
     });
 
-    grunt.registerTask('dist', ['bumpup']);
+    grunt.registerTask('dist', ['jshint','bumpup']);
 };

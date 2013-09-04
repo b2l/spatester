@@ -29,16 +29,6 @@ TestSuite.prototype.run = function()  {
     this.scenario.run();
 };
 
-var spatester = {
+module.exports = {
     TestSuite : TestSuite
 };
-
-// function testJsTestemAdapter(socket) {
-//     spatester.socket = socket;
-// }
-
-// if (Testem) {
-//     Testem.useCustomAdapter(testJsTestemAdapter);
-// }
-
-module.exports = spatester;

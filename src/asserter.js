@@ -30,55 +30,6 @@ Asserter.prototype.assertFalse =  function (assertFunction, description) {
     );
 
 };
-//
-//Asserter.prototype.assertEqual = function(actual, expected, description) {
-//    var assertion = function() {
-//
-//        var v1 = actual;
-//        var v2 = expected;
-//
-//        if ( typeof actual === "function" ) {
-//            v1 = actual();
-//        }
-//        if ( typeof expected === "function" ) {
-//            v2 = expected();
-//        }
-//
-//        if (v1 !== v2) {
-//            throw new Error("expecting '" + v2 + "' but is '" + v1 + "'");
-//        }
-//    };
-//
-//    this.scenario.pushAssert(assertion, description);
-//};
-//
-//Asserter.prototype.assertEqualAsync = function(actual, expected, description) {
-//
-//    var waitFor = function() {
-//        var v1 = null;
-//        var v2 = null;
-//
-//        if ( typeof actual === "function" ) {
-//            v1 = actual();
-//        } else {
-//            v1 = actual;
-//        }
-//        if ( typeof expected === "function" ) {
-//            v2 = expected();
-//        } else {
-//            v2 = expected;
-//        }
-//
-//        if (v1 !== v2) {
-//            throw new Error("expecting " + v2 + " but is " + v1);
-//        }
-//    };
-//
-//    this.scenario.pushAssert( {
-//        waitFor: waitFor,
-//        description: description
-//    });
-//};
 
 Asserter.prototype.assertNodeContains = function(nodeSelector, expectedContent, description) {
     var assertion = function() {
