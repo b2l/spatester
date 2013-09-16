@@ -28,7 +28,7 @@ function assert(assertion, flags, message) {
  */
 var _flags = {
     'to': ['have', 'not'],
-    'have': ['attr', 'value'],
+    'have': ['attribute', 'value'],
     'not': ['to', 'have'],
     'be': ['not', 'checked', 'selected']
 }
@@ -102,10 +102,11 @@ function Assertion(selector, scenario, flag, parent) {
  * @param expected
  * @returns {*}
  */
-Assertion.prototype.attr = function (attrName, expected) {
-    console.log("youhou !!!", attrName, expected);
+Assertion.prototype.attribute = function (attrName, expected) {
+    console.log(attrName, expected);
     var selector = this.selector;
     var assertion;
+    var description;
 
     if (undefined == expected) {
         assertion = assert(
@@ -115,6 +116,7 @@ Assertion.prototype.attr = function (attrName, expected) {
             this.flags,
             ""
         );
+        description = "expect attr " + attrName + " to be set";
     } else {
         assertion = assert(
             function() {
@@ -123,8 +125,9 @@ Assertion.prototype.attr = function (attrName, expected) {
             this.flags,
             ""
         );
+        description = "expect attr " + attrName + " to have value " + expected;
     }
-    this.scenario.pushAssert(assertion);
+    this.scenario.pushAssert(assertion, description);
 
 
     return this;

@@ -186,8 +186,6 @@ function TestAction(assertion, callerLine) {
 }
 TestAction.prototype = new Action();
 TestAction.constructor = TestAction;
-
-
 TestAction.prototype._exec = function () {
     this.assertion.test();
 };

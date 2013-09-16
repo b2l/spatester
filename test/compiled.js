@@ -47,26 +47,26 @@ demoTestSuite.addTest("test form input value with the not operator", function (s
     asserter.assertThat('#my-input').not.to.have.value('titi', "value should be toto");
 });
 
-demoTestSuite.addTest("test node attribute", function (scenario, asserter) {
-    // Given
-
-    // When
-    scenario.exec(function() {
-        document.querySelector('#my-div').setAttribute('title', 'toto');
-    });
-
-    // Then
-    asserter.assertThat('#my-div').to.have.attr('title', 'toto');
-});
+//demoTestSuite.addTest("test node attribute", function (scenario, asserter) {
+//    // Given
+//
+//    // When
+//    scenario.exec(function() {
+//        document.querySelector('#my-div').setAttribute('title', 'toto');
+//    });
+//
+//    // Then
+//    asserter.assertThat('#my-div').to.have.attribute('title', 'toto');
+//});
 
 demoTestSuite.addTest("test node attribute with the not operator", function (scenario, asserter) {
-    asserter.assertThat('#my-div').not.to.have.attr('title');
+    asserter.assertThat('#my-div').not.to.have.attribute('title');
 
     scenario.exec(function() {
         document.querySelector('#my-div').setAttribute('title', 'toto');
     });
 
-    asserter.assertThat('#my-div').not.to.have.attr('title', 'titi');
+    asserter.assertThat('#my-div').not.to.have.attribute('title', 'titi');
 });
 
 demoTestSuite.addTest("test node contains text ", function(scenario, asserter) {
@@ -134,43 +134,7 @@ window.onload = function() {
     }, 500);
 }
 
-},{"../src/testSuite":2}],2:[function(require,module,exports){
-var Asserter = require('./asserter');
-var Scenario = require('./scenario');
-
-var TestSuite = function TestSuite(name, params) {
-    this.name = name;
-    this.setUp = params.setUp || function(){};
-    this.tearDown = params.tearDown || function(){};
-
-    this.tests = [];
-};
-
-TestSuite.prototype.setSocket = function(socket) {
-    this.scenario = new Scenario(name,socket);
-    this.asserter = new Asserter(this.scenario);
-};
-
-TestSuite.prototype.addTest = function(name, test)  {
-    this.scenario.registerTestName(name);
-
-    this.tests.push(test);
-
-
-    this.scenario.exec(this.setUp);
-    test.call(this, this.scenario, this.asserter);
-    this.scenario.exec(this.tearDown);
-};
-
-TestSuite.prototype.run = function()  {
-    this.scenario.run();
-};
-
-module.exports = {
-    TestSuite : TestSuite
-};
-
-},{"./asserter":3,"./scenario":4}],3:[function(require,module,exports){
+},{"../src/testSuite":2}],3:[function(require,module,exports){
 
 function Asserter (scenario) {
     this.scenario = scenario;
@@ -201,7 +165,7 @@ function assert(assertion, flags, message) {
  */
 var _flags = {
     'to': ['have', 'not'],
-    'have': ['attr', 'value'],
+    'have': ['attribute', 'value'],
     'not': ['to', 'have'],
     'be': ['not', 'checked', 'selected']
 }
@@ -275,10 +239,11 @@ function Assertion(selector, scenario, flag, parent) {
  * @param expected
  * @returns {*}
  */
-Assertion.prototype.attr = function (attrName, expected) {
-    console.log("youhou !!!", attrName, expected);
+Assertion.prototype.attribute = function (attrName, expected) {
+    console.log(attrName, expected);
     var selector = this.selector;
     var assertion;
+    var description;
 
     if (undefined == expected) {
         assertion = assert(
@@ -288,6 +253,7 @@ Assertion.prototype.attr = function (attrName, expected) {
             this.flags,
             ""
         );
+        description = "expect attr " + attrName + " to be set";
     } else {
         assertion = assert(
             function() {
@@ -296,8 +262,9 @@ Assertion.prototype.attr = function (attrName, expected) {
             this.flags,
             ""
         );
+        description = "expect attr " + attrName + " to have value " + expected;
     }
-    this.scenario.pushAssert(assertion);
+    this.scenario.pushAssert(assertion, description);
 
 
     return this;
@@ -399,178 +366,161 @@ Assertion.prototype.html = function html() {
 }
 
 module.exports = Asserter;
-},{}],4:[function(require,module,exports){
-var actions = require('./actions');
+},{}],2:[function(require,module,exports){
+var Asserter = require('./asserter');
+var Scenario = require('./scenario');
+var MicroEE = require('microee');
 
-function Scenario(label, socket) {
-    this.label = label;
-    this._actions = [];
-    this.socket = socket;
-    this.results = {
-        failed: 0,
-        passed: 0,
-        total: 0,
-        tests: []
-    };
-}
+var TestSuite = function TestSuite(name, params) {
+    this.name = name;
+    this.setUp = params.setUp || function(){};
+    this.tearDown = params.tearDown || function(){};
 
-Scenario.prototype = {
-    click: function (selector, waitForSelector) {
-        var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.ClickAction(selector, waitForSelector, callerLine));
-        return this;
-    },
-    keyboard: function (selector, action, chromeCode, ffCode) {
-        var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, callerLine));
-        return this;
-    },
-    fill: function (selector, value, waitForSelector) {
-        var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.FillAction(selector, value, waitForSelector, callerLine));
-        return this.wait(selector + "[value='" + value + "']");
-    },
-    select: function (listSelector, value, waitForSelector) {
-        var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.SelectAction(listSelector, value, waitForSelector, callerLine));
-        return this;
-    },
-    wait: function (selector) {
-        var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.WaitAction(selector, callerLine));
-        return this;
-    },
-    exec: function (fn) {
-        this._actions.push(new actions.ExecAction(fn));
-        return this;
-    },
-    registerTestName: function(name) {
-        var scenario = this;
-        this._actions.push(new actions.ExecAction(function() {
-            scenario.currentTest = name;
-        }));
-    },
-    run: function () {
-        this.startTime = new Date().getTime();
-        this.socket.emit("tests-start");
-        this._process(0);
-    },
-
-    pushAssert: function (assertFunction, description) {
-        var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.TestAction({ test: assertFunction, description: description}, callerLine));
-        return this;
-    },
-
-    _getCallerLine: function (error) {
-        if (error.stack) {
-            return error.stack.split("\n")[1];
-        }
-        return "\nDon't test on that shit !";
-    },
-
-    _process: function (index) {
-        var action = this._actions[index];
-        var scenario = this;
-
-        if (!action) {
-            this.socket.emit("all-test-results", this.results);
-        }
-        else if (action.waitFor) {
-            this._processWaitFor(scenario, index, action);
-        }
-        else if (action instanceof actions.TestAction) {
-            this._processTestAction(scenario, index, action);
-        }
-        else {
-            this._processAction(scenario, index, action);
-        }
-    },
-
-    _processAction: function (scenario, index, action) {
-        try {
-            action.exec();
-            scenario._process(index + 1);
-        } catch (e) {
-            this._onError(scenario, index, action, e);
-        }
-    },
-
-    _processTestAction: function (scenario, index, action) {
-        try {
-            action.exec();
-            this._onSuccess(scenario, index, action);
-            scenario._process(index + 1);
-        } catch (e) {
-            this._onError(scenario, index, action, e);
-        }
-    },
-
-    _processWaitFor: function (scenario, index, action) {
-        var start = new Date().getTime();
-        var that = this;
-        setTimeout(function timeout() {
-            try {
-                action.waitFor();
-                if (action instanceof actions.TestAction) {
-                    that._onSuccess(scenario, index, action);
-                }
-                scenario._process(index + 1);
-            } catch (e) {
-                if (new Date().getTime() - start > 2000) {
-                    that._onError(scenario, index, action, e);
-                } else {
-                    setTimeout(timeout, 100);
-                }
-            }
-        }, 200);
-    },
-
-    _onSuccess: function (scenario, index, action) {
-        var result = {
-            id: index,
-            passed: 0,
-            failed: 0,
-            total: 0,
-            name: action.name,
-            items: []
-        };
-        result.passed++;
-        this.results.passed++;
-        result.name = action.name;
-        this.socket.emit("test-result", result);
-        this.results.tests.push(action);
-        this.results.total++;
-    },
-
-    _onError: function (scenario, index, action, e) {
-        var result = {
-            id: index,
-            passed: 0,
-            failed: 0,
-            total: 0,
-            name: this.currentTest + " -> " + action.name,
-            items: []
-        };
-        result.failed++;
-
-        result.items.push({
-            passed: false,
-            message: e ? e.message + "\n at " + action.callerLine : undefined,
-            stack: e && e.stack ? e.stack : undefined
-        });
-        this.socket.emit("test-result", result);
-
-        this.results.failed++;
-        this.results.tests.push(action);
-        this.results.total++;
-
-        this.socket.emit("all-test-results", this.results);
-    }
+    this.tests = [];
 };
 
-module.exports = Scenario;
-},{"./actions":5}],5:[function(require,module,exports){
+TestSuite.prototype.setSocket = function(socket) {
+    this.scenario = new Scenario(name,socket);
+    this.asserter = new Asserter(this.scenario);
+
+    this.scenario.on('test-success', this.onTestSuccess);
+    this.scenario.on('test-error', this.onTestFail);
+    this.scenario.on('error', this.onProcessError);
+    this.scenario.on('tests-start', this.onTestsStart);
+    this.scenario.on('tests-end', this.onTestsEnd);
+};
+
+TestSuite.prototype.addTest = function(name, test)  {
+    this.scenario.registerTestName(name);
+
+    this.tests.push(test);
+
+
+    this.scenario.exec(this.setUp);
+    test.call(this, this.scenario, this.asserter);
+    this.scenario.exec(this.tearDown);
+};
+
+TestSuite.prototype.run = function()  {
+    this.scenario.run();
+};
+
+TestSuite.prototype.onTestFail = function onTestFail(test, e) {
+//    this.emit('test.fail');
+    this.socket.emit('test-result', testemTestResult(test, e, false));
+};
+TestSuite.prototype.onTestSuccess = function onTestSuccess(test, e) {
+//    this.emit('test.success');
+    this.socket.emit('test-result', testemTestResult(test, e, true));
+};
+
+TestSuite.prototype.onProcessError = function onProcessError() {
+    this.socket.emit('all-tests-results', results);
+};
+
+TestSuite.prototype.onTestsStart = function onTestsStart() {
+//    this.emit('test.start');
+    this.socket.emit('tests-start');
+};
+
+TestSuite.prototype.onTestsEnd = function onTestsEnd() {
+    this.socket.emit('all-tests-results', results);
+};
+
+MicroEE.mixin(TestSuite);
+
+module.exports = {
+    TestSuite : TestSuite
+};
+
+
+var test = [];
+var results = {
+    failed: 0,
+    passed: 0,
+    total: 0,
+    tests: []
+};
+
+function testemTestResult(test, e, testStatus) {
+    results.total++;
+    var result = {
+        passed: 0,
+        failed: 0,
+        total: 1,
+        id: 0,
+        name: test.name,
+        items: []
+    };
+
+    if (testStatus) {
+        result.passed++;
+        results.passed++;
+    } else {
+        result.failed++;
+        results.failed++;
+        result.items.push({
+            passed: false,
+            message: test.name,
+            stack: e.stack ? e.stack : undefined
+        });
+    }
+
+    results.tests.push(result);
+
+    return result;
+}
+
+},{"./asserter":3,"./scenario":4,"microee":5}],5:[function(require,module,exports){
+function M() { this._events = {}; }
+M.prototype = {
+  on: function(ev, cb) {
+    this._events || (this._events = {});
+    var e = this._events;
+    (e[ev] || (e[ev] = [])).push(cb);
+    return this;
+  },
+  removeListener: function(ev, cb) {
+    var e = this._events[ev] || [], i;
+    for(i = e.length-1; i >= 0 && e[i]; i--){
+      if(e[i] === cb || e[i].cb === cb) { e.splice(i, 1); }
+    }
+  },
+  removeAllListeners: function(ev) {
+    if(!ev) { this._events = {}; }
+    else { this._events[ev] && (this._events[ev] = []); }
+  },
+  emit: function(ev) {
+    this._events || (this._events = {});
+    var args = Array.prototype.slice.call(arguments, 1), i, e = this._events[ev] || [];
+    for(i = e.length-1; i >= 0 && e[i]; i--){
+      e[i].apply(this, args);
+    }
+    return this;
+  },
+  when: function(ev, cb) {
+    return this.once(ev, cb, true);
+  },
+  once: function(ev, cb, when) {
+    if(!cb) return this;
+    function c() {
+      if(!when) this.removeListener(ev, c);
+      if(cb.apply(this, arguments) && when) this.removeListener(ev, c);
+    }
+    c.cb = cb;
+    this.on(ev, c);
+    return this;
+  }
+};
+M.mixin = function(dest) {
+  var o = M.prototype, k;
+  for (k in o) {
+    o.hasOwnProperty(k) && (dest.prototype[k] = o[k]);
+  }
+};
+module.exports = M;
+
+},{}],6:[function(require,module,exports){
 
 /**
  * Action class
@@ -759,8 +709,6 @@ function TestAction(assertion, callerLine) {
 }
 TestAction.prototype = new Action();
 TestAction.constructor = TestAction;
-
-
 TestAction.prototype._exec = function () {
     this.assertion.test();
 };
@@ -769,5 +717,141 @@ actions.TestAction = TestAction;
 
 module.exports = actions;
 
-},{}]},{},[1])
+},{}],4:[function(require,module,exports){
+var actions = require('./actions');
+var MicroEE = require('microee');
+
+function Scenario(label, socket) {
+    this.label = label;
+    this._actions = [];
+    this.socket = socket;
+    this.results = {
+        failed: 0,
+        passed: 0,
+        total: 0,
+        tests: []
+    };
+}
+
+Scenario.prototype = {
+    click: function (selector, waitForSelector) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.ClickAction(selector, waitForSelector, callerLine));
+        return this;
+    },
+    keyboard: function (selector, action, chromeCode, ffCode) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, callerLine));
+        return this;
+    },
+    fill: function (selector, value, waitForSelector) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.FillAction(selector, value, waitForSelector, callerLine));
+        return this.wait(selector + "[value='" + value + "']");
+    },
+    select: function (listSelector, value, waitForSelector) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.SelectAction(listSelector, value, waitForSelector, callerLine));
+        return this;
+    },
+    wait: function (selector) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.WaitAction(selector, callerLine));
+        return this;
+    },
+    exec: function (fn) {
+        this._actions.push(new actions.ExecAction(fn));
+        return this;
+    },
+    registerTestName: function(name) {
+        var scenario = this;
+        this._actions.push(new actions.ExecAction(function() {
+            scenario.currentTest = name;
+        }));
+    },
+    run: function () {
+        this.startTime = new Date().getTime();
+        this.emit("tests-start");
+        this._process(0);
+    },
+
+    pushAssert: function (assertFunction, description) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.TestAction({ test: assertFunction, description: description}, callerLine));
+        return this;
+    },
+
+    _getCallerLine: function (error) {
+        if (error.stack) {
+            return error.stack.split("\n")[1];
+        }
+        return "\nDon't test on that shit !";
+    },
+
+    _process: function (index) {
+        var action = this._actions[index];
+        var scenario = this;
+
+        if (!action) {
+            this.emit('tests-end')
+        }
+        else if (action.waitFor) {
+            this._processWaitFor(scenario, index, action);
+        }
+        else if (action instanceof actions.TestAction) {
+            this._processTestAction(scenario, index, action);
+        }
+        else {
+            this._processAction(scenario, index, action);
+        }
+    },
+
+    _processAction: function (scenario, index, action) {
+        try {
+            action.exec();
+            scenario._process(index + 1);
+        } catch (e) {
+            this._onError(scenario, index, action, e);
+        }
+    },
+
+    _processTestAction: function (scenario, index, action) {
+        try {
+            action.exec();
+            this.emit('test-success', action);
+            scenario._process(index + 1);
+        } catch (e) {
+            this.emit('test-error', action);
+        }
+    },
+
+    _processWaitFor: function (scenario, index, action) {
+        var start = new Date().getTime();
+        var that = this;
+        setTimeout(function timeout() {
+            try {
+                action.waitFor();
+                scenario._process(index + 1);
+            } catch (e) {
+                if (new Date().getTime() - start > 2000) {
+                    that._onError(scenario, index, action, e);
+                } else {
+                    setTimeout(timeout, 100);
+                }
+            }
+        }, 200);
+    },
+
+    _onSuccess: function (scenario, index, action) {
+    },
+
+    _onError: function (scenario, index, action, e) {
+        this.emit('error', action, e);
+    }
+};
+
+MicroEE.mixin(Scenario);
+
+module.exports = Scenario;
+},{"./actions":6,"microee":5}]},{},[1])
 ;

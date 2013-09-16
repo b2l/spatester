@@ -1,4 +1,5 @@
 var actions = require('./actions');
+var MicroEE = require('microee');
 
 function Scenario(label, socket) {
     this.label = label;
@@ -50,7 +51,7 @@ Scenario.prototype = {
     },
     run: function () {
         this.startTime = new Date().getTime();
-        this.socket.emit("tests-start");
+        this.emit("tests-start");
         this._process(0);
     },
 
@@ -72,7 +73,7 @@ Scenario.prototype = {
         var scenario = this;
 
         if (!action) {
-            this.socket.emit("all-test-results", this.results);
+            this.emit('tests-end')
         }
         else if (action.waitFor) {
             this._processWaitFor(scenario, index, action);
@@ -97,10 +98,10 @@ Scenario.prototype = {
     _processTestAction: function (scenario, index, action) {
         try {
             action.exec();
-            this._onSuccess(scenario, index, action);
+            this.emit('test-success', action);
             scenario._process(index + 1);
         } catch (e) {
-            this._onError(scenario, index, action, e);
+            this.emit('test-error', action);
         }
     },
 
@@ -110,9 +111,6 @@ Scenario.prototype = {
         setTimeout(function timeout() {
             try {
                 action.waitFor();
-                if (action instanceof actions.TestAction) {
-                    that._onSuccess(scenario, index, action);
-                }
                 scenario._process(index + 1);
             } catch (e) {
                 if (new Date().getTime() - start > 2000) {
@@ -125,46 +123,13 @@ Scenario.prototype = {
     },
 
     _onSuccess: function (scenario, index, action) {
-        var result = {
-            id: index,
-            passed: 0,
-            failed: 0,
-            total: 0,
-            name: action.name,
-            items: []
-        };
-        result.passed++;
-        this.results.passed++;
-        result.name = action.name;
-        this.socket.emit("test-result", result);
-        this.results.tests.push(action);
-        this.results.total++;
     },
 
     _onError: function (scenario, index, action, e) {
-        var result = {
-            id: index,
-            passed: 0,
-            failed: 0,
-            total: 0,
-            name: this.currentTest + " -> " + action.name,
-            items: []
-        };
-        result.failed++;
-
-        result.items.push({
-            passed: false,
-            message: e ? e.message + "\n at " + action.callerLine : undefined,
-            stack: e && e.stack ? e.stack : undefined
-        });
-        this.socket.emit("test-result", result);
-
-        this.results.failed++;
-        this.results.tests.push(action);
-        this.results.total++;
-
-        this.socket.emit("all-test-results", this.results);
+        this.emit('error', action, e);
     }
 };
+
+MicroEE.mixin(Scenario);
 
 module.exports = Scenario;

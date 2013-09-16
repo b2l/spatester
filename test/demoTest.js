@@ -46,26 +46,26 @@ demoTestSuite.addTest("test form input value with the not operator", function (s
     asserter.assertThat('#my-input').not.to.have.value('titi', "value should be toto");
 });
 
-demoTestSuite.addTest("test node attribute", function (scenario, asserter) {
-    // Given
-
-    // When
-    scenario.exec(function() {
-        document.querySelector('#my-div').setAttribute('title', 'toto');
-    });
-
-    // Then
-    asserter.assertThat('#my-div').to.have.attr('title', 'toto');
-});
+//demoTestSuite.addTest("test node attribute", function (scenario, asserter) {
+//    // Given
+//
+//    // When
+//    scenario.exec(function() {
+//        document.querySelector('#my-div').setAttribute('title', 'toto');
+//    });
+//
+//    // Then
+//    asserter.assertThat('#my-div').to.have.attribute('title', 'toto');
+//});
 
 demoTestSuite.addTest("test node attribute with the not operator", function (scenario, asserter) {
-    asserter.assertThat('#my-div').not.to.have.attr('title');
+    asserter.assertThat('#my-div').not.to.have.attribute('title');
 
     scenario.exec(function() {
         document.querySelector('#my-div').setAttribute('title', 'toto');
     });
 
-    asserter.assertThat('#my-div').not.to.have.attr('title', 'titi');
+    asserter.assertThat('#my-div').not.to.have.attribute('title', 'titi');
 });
 
 demoTestSuite.addTest("test node contains text ", function(scenario, asserter) {
