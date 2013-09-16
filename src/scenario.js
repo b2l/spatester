@@ -110,7 +110,7 @@ Scenario.prototype = {
         setTimeout(function timeout() {
             try {
                 action.waitFor();
-                if (action instanceof Actions.TestAction) {
+                if (action instanceof actions.TestAction) {
                     that._onSuccess(scenario, index, action);
                 }
                 scenario._process(index + 1);

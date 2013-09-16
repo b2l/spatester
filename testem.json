@@ -1,0 +1,6 @@
+{
+  "framework": "custom",
+  "src_files": [
+    "test/compiled.js"
+  ]
+}
