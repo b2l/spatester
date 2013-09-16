@@ -2,6 +2,14 @@ var Asserter = require('./asserter');
 var Scenario = require('./scenario');
 var MicroEE = require('microee');
 
+var test = [];
+var results = {
+    failed: 0,
+    passed: 0,
+    total: 0,
+    tests: []
+};
+
 var TestSuite = function TestSuite(name, params) {
     this.name = name;
     this.setUp = params.setUp || function(){};
@@ -14,11 +22,11 @@ TestSuite.prototype.setSocket = function(socket) {
     this.scenario = new Scenario(name,socket);
     this.asserter = new Asserter(this.scenario);
 
+    this.scenario.on('tests-start', this.onTestsStart);
+    this.scenario.on('tests-end', this.onTestsEnd);
     this.scenario.on('test-success', this.onTestSuccess);
     this.scenario.on('test-error', this.onTestFail);
     this.scenario.on('error', this.onProcessError);
-    this.scenario.on('tests-start', this.onTestsStart);
-    this.scenario.on('tests-end', this.onTestsEnd);
 };
 
 TestSuite.prototype.addTest = function(name, test)  {
@@ -45,32 +53,23 @@ TestSuite.prototype.onTestSuccess = function onTestSuccess(test, e) {
     this.socket.emit('test-result', testemTestResult(test, e, true));
 };
 
-TestSuite.prototype.onProcessError = function onProcessError() {
-    this.socket.emit('all-tests-results', results);
+TestSuite.prototype.onProcessError = function onProcessError(test, e) {
+    this.socket.emit('test-result', testemTestResult(test, e, false));
+    this.socket.emit('all-test-results', results);
 };
 
 TestSuite.prototype.onTestsStart = function onTestsStart() {
-//    this.emit('test.start');
     this.socket.emit('tests-start');
 };
 
 TestSuite.prototype.onTestsEnd = function onTestsEnd() {
-    this.socket.emit('all-tests-results', results);
+    this.socket.emit('all-test-results', results);
 };
 
 MicroEE.mixin(TestSuite);
 
 module.exports = {
     TestSuite : TestSuite
-};
-
-
-var test = [];
-var results = {
-    failed: 0,
-    passed: 0,
-    total: 0,
-    tests: []
 };
 
 function testemTestResult(test, e, testStatus) {
@@ -80,7 +79,7 @@ function testemTestResult(test, e, testStatus) {
         failed: 0,
         total: 1,
         id: 0,
-        name: test.name,
+        name: test.name || "",
         items: []
     };
 
@@ -92,7 +91,7 @@ function testemTestResult(test, e, testStatus) {
         results.failed++;
         result.items.push({
             passed: false,
-            message: test.name,
+            message: test.name || "",
             stack: e.stack ? e.stack : undefined
         });
     }

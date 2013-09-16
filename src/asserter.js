@@ -28,9 +28,9 @@ function assert(assertion, flags, message) {
  */
 var _flags = {
     'to': ['have', 'not'],
-    'have': ['attribute', 'value'],
-    'not': ['to', 'have'],
-    'be': ['not', 'checked', 'selected']
+    'have': ['not', 'to'],
+    'not': ['to', 'have', 'be'],
+    'be': ['not']
 }
 
 /**
@@ -102,13 +102,12 @@ function Assertion(selector, scenario, flag, parent) {
  * @param expected
  * @returns {*}
  */
-Assertion.prototype.attribute = function (attrName, expected) {
-    console.log(attrName, expected);
+Assertion.prototype.attr = function(attrName, expected) {
     var selector = this.selector;
     var assertion;
     var description;
 
-    if (undefined == expected) {
+    if (undefined === expected) {
         assertion = assert(
             function() {
                 return document.querySelector(selector).hasAttribute(attrName);
@@ -128,9 +127,6 @@ Assertion.prototype.attribute = function (attrName, expected) {
         description = "expect attr " + attrName + " to have value " + expected;
     }
     this.scenario.pushAssert(assertion, description);
-
-
-    return this;
 };
 
 /**
@@ -142,7 +138,7 @@ Assertion.prototype.attribute = function (attrName, expected) {
  * @param description
  * @returns {*}
  */
-Assertion.prototype.value = function value(expected, description) {
+Assertion.prototype.value = function(expected, description) {
     var selector = this.selector;
     var assertion = assert(
         function() {
@@ -152,8 +148,6 @@ Assertion.prototype.value = function value(expected, description) {
         description
     );
     this.scenario.pushAssert(assertion,  description);
-
-    return this;
 };
 
 /**

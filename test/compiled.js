@@ -47,26 +47,27 @@ demoTestSuite.addTest("test form input value with the not operator", function (s
     asserter.assertThat('#my-input').not.to.have.value('titi', "value should be toto");
 });
 
-//demoTestSuite.addTest("test node attribute", function (scenario, asserter) {
-//    // Given
-//
-//    // When
-//    scenario.exec(function() {
-//        document.querySelector('#my-div').setAttribute('title', 'toto');
-//    });
-//
-//    // Then
-//    asserter.assertThat('#my-div').to.have.attribute('title', 'toto');
-//});
+demoTestSuite.addTest("test node attribute", function (scenario, asserter) {
+    // Given
+
+    // When
+    scenario.exec(function() {
+        document.querySelector('#my-div').setAttribute('title', 'toto');
+    });
+
+    // Then
+    asserter.assertThat('#my-div').to.have.attr('title');
+    asserter.assertThat('#my-div').to.have.attr('title', "toto");
+});
 
 demoTestSuite.addTest("test node attribute with the not operator", function (scenario, asserter) {
-    asserter.assertThat('#my-div').not.to.have.attribute('title');
+    asserter.assertThat('#my-div').not.to.have.attr('title');
 
     scenario.exec(function() {
         document.querySelector('#my-div').setAttribute('title', 'toto');
     });
 
-    asserter.assertThat('#my-div').not.to.have.attribute('title', 'titi');
+    asserter.assertThat('#my-div').not.to.have.attr('title', 'titi');
 });
 
 demoTestSuite.addTest("test node contains text ", function(scenario, asserter) {
@@ -165,9 +166,9 @@ function assert(assertion, flags, message) {
  */
 var _flags = {
     'to': ['have', 'not'],
-    'have': ['attribute', 'value'],
-    'not': ['to', 'have'],
-    'be': ['not', 'checked', 'selected']
+    'have': ['not', 'to'],
+    'not': ['to', 'have', 'be'],
+    'be': ['not']
 }
 
 /**
@@ -239,13 +240,12 @@ function Assertion(selector, scenario, flag, parent) {
  * @param expected
  * @returns {*}
  */
-Assertion.prototype.attribute = function (attrName, expected) {
-    console.log(attrName, expected);
+Assertion.prototype.attr = function(attrName, expected) {
     var selector = this.selector;
     var assertion;
     var description;
 
-    if (undefined == expected) {
+    if (undefined === expected) {
         assertion = assert(
             function() {
                 return document.querySelector(selector).hasAttribute(attrName);
@@ -265,9 +265,6 @@ Assertion.prototype.attribute = function (attrName, expected) {
         description = "expect attr " + attrName + " to have value " + expected;
     }
     this.scenario.pushAssert(assertion, description);
-
-
-    return this;
 };
 
 /**
@@ -279,7 +276,7 @@ Assertion.prototype.attribute = function (attrName, expected) {
  * @param description
  * @returns {*}
  */
-Assertion.prototype.value = function value(expected, description) {
+Assertion.prototype.value = function(expected, description) {
     var selector = this.selector;
     var assertion = assert(
         function() {
@@ -289,8 +286,6 @@ Assertion.prototype.value = function value(expected, description) {
         description
     );
     this.scenario.pushAssert(assertion,  description);
-
-    return this;
 };
 
 /**
@@ -371,6 +366,14 @@ var Asserter = require('./asserter');
 var Scenario = require('./scenario');
 var MicroEE = require('microee');
 
+var test = [];
+var results = {
+    failed: 0,
+    passed: 0,
+    total: 0,
+    tests: []
+};
+
 var TestSuite = function TestSuite(name, params) {
     this.name = name;
     this.setUp = params.setUp || function(){};
@@ -383,11 +386,11 @@ TestSuite.prototype.setSocket = function(socket) {
     this.scenario = new Scenario(name,socket);
     this.asserter = new Asserter(this.scenario);
 
+    this.scenario.on('tests-start', this.onTestsStart);
+    this.scenario.on('tests-end', this.onTestsEnd);
     this.scenario.on('test-success', this.onTestSuccess);
     this.scenario.on('test-error', this.onTestFail);
     this.scenario.on('error', this.onProcessError);
-    this.scenario.on('tests-start', this.onTestsStart);
-    this.scenario.on('tests-end', this.onTestsEnd);
 };
 
 TestSuite.prototype.addTest = function(name, test)  {
@@ -414,32 +417,23 @@ TestSuite.prototype.onTestSuccess = function onTestSuccess(test, e) {
     this.socket.emit('test-result', testemTestResult(test, e, true));
 };
 
-TestSuite.prototype.onProcessError = function onProcessError() {
-    this.socket.emit('all-tests-results', results);
+TestSuite.prototype.onProcessError = function onProcessError(test, e) {
+    this.socket.emit('test-result', testemTestResult(test, e, false));
+    this.socket.emit('all-test-results', results);
 };
 
 TestSuite.prototype.onTestsStart = function onTestsStart() {
-//    this.emit('test.start');
     this.socket.emit('tests-start');
 };
 
 TestSuite.prototype.onTestsEnd = function onTestsEnd() {
-    this.socket.emit('all-tests-results', results);
+    this.socket.emit('all-test-results', results);
 };
 
 MicroEE.mixin(TestSuite);
 
 module.exports = {
     TestSuite : TestSuite
-};
-
-
-var test = [];
-var results = {
-    failed: 0,
-    passed: 0,
-    total: 0,
-    tests: []
 };
 
 function testemTestResult(test, e, testStatus) {
@@ -449,7 +443,7 @@ function testemTestResult(test, e, testStatus) {
         failed: 0,
         total: 1,
         id: 0,
-        name: test.name,
+        name: test.name || "",
         items: []
     };
 
@@ -461,7 +455,7 @@ function testemTestResult(test, e, testStatus) {
         results.failed++;
         result.items.push({
             passed: false,
-            message: test.name,
+            message: test.name || "",
             stack: e.stack ? e.stack : undefined
         });
     }
@@ -471,56 +465,7 @@ function testemTestResult(test, e, testStatus) {
     return result;
 }
 
-},{"./asserter":3,"./scenario":4,"microee":5}],5:[function(require,module,exports){
-function M() { this._events = {}; }
-M.prototype = {
-  on: function(ev, cb) {
-    this._events || (this._events = {});
-    var e = this._events;
-    (e[ev] || (e[ev] = [])).push(cb);
-    return this;
-  },
-  removeListener: function(ev, cb) {
-    var e = this._events[ev] || [], i;
-    for(i = e.length-1; i >= 0 && e[i]; i--){
-      if(e[i] === cb || e[i].cb === cb) { e.splice(i, 1); }
-    }
-  },
-  removeAllListeners: function(ev) {
-    if(!ev) { this._events = {}; }
-    else { this._events[ev] && (this._events[ev] = []); }
-  },
-  emit: function(ev) {
-    this._events || (this._events = {});
-    var args = Array.prototype.slice.call(arguments, 1), i, e = this._events[ev] || [];
-    for(i = e.length-1; i >= 0 && e[i]; i--){
-      e[i].apply(this, args);
-    }
-    return this;
-  },
-  when: function(ev, cb) {
-    return this.once(ev, cb, true);
-  },
-  once: function(ev, cb, when) {
-    if(!cb) return this;
-    function c() {
-      if(!when) this.removeListener(ev, c);
-      if(cb.apply(this, arguments) && when) this.removeListener(ev, c);
-    }
-    c.cb = cb;
-    this.on(ev, c);
-    return this;
-  }
-};
-M.mixin = function(dest) {
-  var o = M.prototype, k;
-  for (k in o) {
-    o.hasOwnProperty(k) && (dest.prototype[k] = o[k]);
-  }
-};
-module.exports = M;
-
-},{}],6:[function(require,module,exports){
+},{"./asserter":3,"./scenario":4,"microee":5}],6:[function(require,module,exports){
 
 /**
  * Action class
@@ -716,6 +661,55 @@ TestAction.prototype._exec = function () {
 actions.TestAction = TestAction;
 
 module.exports = actions;
+
+},{}],5:[function(require,module,exports){
+function M() { this._events = {}; }
+M.prototype = {
+  on: function(ev, cb) {
+    this._events || (this._events = {});
+    var e = this._events;
+    (e[ev] || (e[ev] = [])).push(cb);
+    return this;
+  },
+  removeListener: function(ev, cb) {
+    var e = this._events[ev] || [], i;
+    for(i = e.length-1; i >= 0 && e[i]; i--){
+      if(e[i] === cb || e[i].cb === cb) { e.splice(i, 1); }
+    }
+  },
+  removeAllListeners: function(ev) {
+    if(!ev) { this._events = {}; }
+    else { this._events[ev] && (this._events[ev] = []); }
+  },
+  emit: function(ev) {
+    this._events || (this._events = {});
+    var args = Array.prototype.slice.call(arguments, 1), i, e = this._events[ev] || [];
+    for(i = e.length-1; i >= 0 && e[i]; i--){
+      e[i].apply(this, args);
+    }
+    return this;
+  },
+  when: function(ev, cb) {
+    return this.once(ev, cb, true);
+  },
+  once: function(ev, cb, when) {
+    if(!cb) return this;
+    function c() {
+      if(!when) this.removeListener(ev, c);
+      if(cb.apply(this, arguments) && when) this.removeListener(ev, c);
+    }
+    c.cb = cb;
+    this.on(ev, c);
+    return this;
+  }
+};
+M.mixin = function(dest) {
+  var o = M.prototype, k;
+  for (k in o) {
+    o.hasOwnProperty(k) && (dest.prototype[k] = o[k]);
+  }
+};
+module.exports = M;
 
 },{}],4:[function(require,module,exports){
 var actions = require('./actions');
