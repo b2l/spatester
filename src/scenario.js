@@ -1,10 +1,9 @@
 var actions = require('./actions');
 var MicroEE = require('microee');
 
-function Scenario(label, socket) {
+function Scenario(label) {
     this.label = label;
     this._actions = [];
-    this.socket = socket;
     this.results = {
         failed: 0,
         passed: 0,

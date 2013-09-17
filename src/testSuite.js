@@ -19,7 +19,7 @@ var TestSuite = function TestSuite(name, params) {
 };
 
 TestSuite.prototype.setSocket = function(socket) {
-    this.scenario = new Scenario(name,socket);
+    this.scenario = new Scenario(name);
     this.asserter = new Asserter(this.scenario);
 
     this.scenario.on('tests-start', this.onTestsStart);
