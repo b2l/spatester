@@ -73,13 +73,37 @@ ClickAction.prototype = new Action();
 ClickAction.constructor = ClickAction;
 ClickAction.prototype._exec = function () {
     try {
-        document.querySelectorAll(this.selector)[0].click();
+        document.querySelector(this.selector).click();
     } catch (e) {
         throw new Error('Can\'t click on element: ' + this.selector, e);
     }
 };
 
 actions.ClickAction = ClickAction;
+
+/**
+ * DoubleClickAction class
+ * @extend Action
+ *
+ * DoubleClick on a given selector
+ */
+function DoubleClickAction(selector, waitFor, callerLine) {
+    this.selector = selector;
+    this.waitFor = waitFor;
+    this.name = "double click on element matching selector " + selector;
+    this.callerLine = callerLine;
+}
+DoubleClickAction.prototype = new Action();
+DoubleClickAction.constructor = DoubleClickAction;
+DoubleClickAction.prototype._exec = function () {
+    try {
+        document.querySelector(this.selector).dblclick();
+    } catch (e) {
+        throw new Error('Can\'t double click on element: ' + this.selector, e);
+    }
+};
+
+actions.DoubleClickAction = DoubleClickAction;
 
 /**
  * KeyboardAction class

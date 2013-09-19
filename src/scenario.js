@@ -18,6 +18,11 @@ Scenario.prototype = {
         this._actions.push(new actions.ClickAction(selector, waitForSelector, callerLine));
         return this;
     },
+    dblclick: function (selector, waitForSelector) {
+        var callerLine = this._getCallerLine(new Error());
+        this._actions.push(new actions.DoubleClickAction(selector, waitForSelector, callerLine));
+        return this;
+    },
     keyboard: function (selector, action, chromeCode, ffCode) {
         var callerLine = this._getCallerLine(new Error());
         this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, callerLine));
