@@ -41,10 +41,10 @@ Asserter.prototype.assertNodeContains = function(nodeSelector, expectedContent, 
         }
     };
 
-    this.scenario.pushAssert( {
-        test: assertion,
-        description: description
-    });
+    this.scenario.pushAssert(
+        assertion,
+        description
+    );
 };
 
 Asserter.prototype.count = function (selector) {
