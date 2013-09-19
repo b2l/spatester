@@ -8,7 +8,14 @@ module.exports = function(grunt) {
         jshint:{
             all: ['Gruntfile.js', 'src/*.js']
         },
-        bumpup: ['package.json']
+        bumpup: {
+            options: {
+                version: function (old, type) {
+                    return old.replace(/([\d])+$/, grunt.option('wc-version'));
+                }
+            },
+            file: 'package.json'
+        }
     });
 
     grunt.registerTask('build',['jshint']);
