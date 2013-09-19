@@ -33,7 +33,7 @@ Asserter.prototype.assertFalse =  function (assertFunction, description) {
 
 Asserter.prototype.assertNodeContains = function(nodeSelector, expectedContent, description) {
     var assertion = function() {
-        var content = document.querySelector(nodeSelector).innerText || document.querySelector(nodeSelector).textcontent ;
+        var content = document.querySelector(nodeSelector).innerText || document.querySelector(nodeSelector).textContent ;
 
         var regExp = new RegExp(expectedContent);
         if (regExp.test(content)) {
