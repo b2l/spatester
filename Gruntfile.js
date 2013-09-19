@@ -11,5 +11,6 @@ module.exports = function(grunt) {
         bumpup: ['package.json']
     });
 
+    grunt.registerTask('build',['jshint']);
     grunt.registerTask('dist', ['jshint','bumpup']);
 };
