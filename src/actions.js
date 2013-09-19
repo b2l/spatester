@@ -97,7 +97,9 @@ DoubleClickAction.prototype = new Action();
 DoubleClickAction.constructor = DoubleClickAction;
 DoubleClickAction.prototype._exec = function () {
     try {
-        document.querySelector(this.selector).dblclick();
+        var dblClickEvent = new MouseEvent("MouseEvent");
+        dblClickEvent.initEvent('dblclick', true, true);
+        document.querySelector(this.selector).dispatchEvent(dblClickEvent);
     } catch (e) {
         throw new Error('Can\'t double click on element: ' + this.selector, e);
     }
