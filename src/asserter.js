@@ -36,7 +36,7 @@ Asserter.prototype.assertNodeContains = function(nodeSelector, expectedContent, 
         var content = document.querySelector(nodeSelector).innerText || document.querySelector(nodeSelector).textContent ;
 
         var regExp = new RegExp(expectedContent);
-        if (regExp.test(content)) {
+        if (!regExp.test(content)) {
             throw new Error("expecting " + expectedContent + " but is " + content);
         }
     };
