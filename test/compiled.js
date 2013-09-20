@@ -383,7 +383,7 @@ var TestSuite = function TestSuite(name, params) {
 };
 
 TestSuite.prototype.setSocket = function(socket) {
-    this.scenario = new Scenario(name);
+    this.scenario = new Scenario(name,socket);
     this.asserter = new Asserter(this.scenario);
 
     this.scenario.on('tests-start', this.onTestsStart);
@@ -715,9 +715,10 @@ module.exports = M;
 var actions = require('./actions');
 var MicroEE = require('microee');
 
-function Scenario(label) {
+function Scenario(label, socket) {
     this.label = label;
     this._actions = [];
+    this.socket = socket;
     this.results = {
         failed: 0,
         passed: 0,
