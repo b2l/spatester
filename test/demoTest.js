@@ -132,4 +132,4 @@ window.onload = function() {
     setTimeout(function() {
         demoTestSuite.run();
     }, 500);
-}
+};

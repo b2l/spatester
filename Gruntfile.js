@@ -3,7 +3,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-testem');
+    grunt.loadNpmTasks('grunt-contrib-testem');
     grunt.loadNpmTasks('grunt-bumpup');
 
     // Project configuration.
@@ -20,30 +20,39 @@ module.exports = function(grunt) {
         /* DEV MODE - auto compile & test */
         'watch': {
             'spatester': {
-                files: ['src/**/*.js', 'test/demoTest.js'],
+                files: ['src/**/*.js', 'test/demoTest.js', 'test/qunit/test.js'],
                 tasks: ['browserify']
             }
         },
 
         browserify: {
-            'test/compiled.js': ['test/demoTest.js']
+            'test/compiled.js': ['test/demoTest.js'],
+            'test/qunit/compiled.js': ['test/qunit/test.js']
         },
 
         testem: {
-            options: {
-                launch_in_ci : [
-                    'chromium'
-                ]
-            },
-            main : {
-                framework: 'custom',
+            spa : {
                 src: [ 'test/compiled.js' ],
-                dest: 'test-result/testem-ci.tap'
+                options: {
+                    framework: 'custom',
+                    'launch_in_ci' : [
+                        'chromium'
+                    ]
+                }
+            },
+            qunit : {
+                src: [ 'test/qunit/compiled.js' ],
+                options: {
+                    framework: 'qunit',
+                    'launch_in_ci' : [
+                        'chromium'
+                    ]
+                }
             }
         }
     });
 
     grunt.registerTask('dist', ['jshint','bumpup']);
-    grunt.registerTask('dev', ['watch']);
-    grunt.registerTask('test', ['browserify', 'testem']);
+    grunt.registerTask('dev', ['browserify', 'watch']);
+    grunt.registerTask('test', ['browserify', 'testem:ci:spa','testem:ci:qunit']);
 };

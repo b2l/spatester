@@ -1,0 +1,6 @@
+{
+  "framework": "qunit",
+  "src_files": [
+    "test/qunit/compiled.js"
+  ]
+}

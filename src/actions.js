@@ -29,7 +29,11 @@ Action.prototype = {
  */
 function WaitAction(selector, callerLine) {
     this.waitFor = function () {
-        return document.querySelector(selector);
+        var res = document.querySelector(selector);
+        if(!res) {
+            throw new Error();
+        }
+        return res;
     };
     this.name = "Wait for an element matching the selector " + selector;
     this.callerLine = callerLine;

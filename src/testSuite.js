@@ -14,12 +14,13 @@ var TestSuite = function TestSuite(name, params) {
     this.name = name;
     this.setUp = params.setUp || function(){};
     this.tearDown = params.tearDown || function(){};
+    this.defaultTimeout = params.defaultTimeout || 2000;
 
     this.tests = [];
 };
 
 TestSuite.prototype.setSocket = function(socket) {
-    this.scenario = new Scenario(name,socket);
+    this.scenario = new Scenario(name,socket, this.defaultTimeout);
     this.asserter = new Asserter(this.scenario);
 
     this.scenario.on('tests-start', this.onTestsStart);

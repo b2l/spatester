@@ -1,10 +1,11 @@
 var actions = require('./actions');
 var MicroEE = require('microee');
 
-function Scenario(label, socket) {
+function Scenario(label, socket, timeout) {
     this.label = label;
     this._actions = [];
     this.socket = socket;
+    this.timeout = timeout;
     this.results = {
         failed: 0,
         passed: 0,
@@ -107,19 +108,19 @@ Scenario.prototype = {
 
     _processWaitFor: function (scenario, index, action) {
         var start = new Date().getTime();
-        var that = this;
+        
         setTimeout(function timeout() {
             try {
                 action.waitFor();
                 scenario._process(index + 1);
             } catch (e) {
-                if (new Date().getTime() - start > 2000) {
-                    that._onError(scenario, index, action, e);
+                if (new Date().getTime() - start > this.timeout) {
+                    this._onError(scenario, index, action, e);
                 } else {
                     setTimeout(timeout, 100);
                 }
             }
-        }, 200);
+        }.bind(this), 200);
     },
 
     _onSuccess: function (scenario, index, action) {
