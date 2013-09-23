@@ -1,4 +1,5 @@
 var TestSuite = require('../src/testSuite').TestSuite;
+require('../src/testem-adapter.js');
 
 var demoTestSuite = new TestSuite("demo test suite", {
     setUp: function() {
@@ -17,13 +18,8 @@ var demoTestSuite = new TestSuite("demo test suite", {
         document.body.removeChild(input);
         document.body.removeChild(div);
     },
-    verbose: false
+    verbose: true
 });
-
-Testem.useCustomAdapter(function (socket) {
-    demoTestSuite.setSocket(socket);
-});
-
 
 demoTestSuite.addTest("test form input value", function (scenario, asserter) {
     // Given

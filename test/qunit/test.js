@@ -19,10 +19,6 @@ asyncTest( "wait on existing element", function() {
         defaultTimeout: 100
     });
 
-    demoTestSuite.setSocket({
-        emit: function() {}
-    });
-
     demoTestSuite.addTest("test wait for existing element", function(scenario, asserter) {
         scenario.exec(function() {
             var myDiv = document.createElement("div");
@@ -54,10 +50,6 @@ asyncTest( "wait on unexisting element", function() {
         tearDown: function() {
         },
         defaultTimeout: 100
-    });
-
-    demoTestSuite.setSocket({
-        emit: function() {}
     });
 
     demoTestSuite.addTest("test wait for unexisting element", function(scenario, asserter) {

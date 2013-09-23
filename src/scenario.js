@@ -127,10 +127,16 @@ Scenario.prototype = {
         }
         setTimeout(function timeout() {
             try {
+                if (this.verbose) {
+                    console.log(action.toString());
+                }
                 action.waitFor();
                 scenario._process(index + 1);
             } catch (e) {
                 if (new Date().getTime() - start > this.timeout) {
+                    if (this.verbose) {
+                        console.log("Wait for timeout")
+                    }
                     this._onError(scenario, index, action, e);
                 } else {
                     setTimeout(timeout, 100);
