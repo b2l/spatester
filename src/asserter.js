@@ -47,6 +47,23 @@ Asserter.prototype.assertNodeContains = function(nodeSelector, expectedContent, 
     );
 };
 
+
+Asserter.prototype.assertNodeNotContains = function(nodeSelector, unexpectedContent, description) {
+    var assertion = function() {
+        var content = document.querySelector(nodeSelector).innerText || document.querySelector(nodeSelector).textContent ;
+
+        var regExp = new RegExp(unexpectedContent);
+        if (regExp.test(content)) {
+            throw new Error("expecting " + unexpectedContent + " to be different from " + content);
+        }
+    };
+
+    this.scenario.pushAssert(
+        assertion,
+        description
+    );
+};
+
 Asserter.prototype.count = function (selector) {
     return function() {
         return document.querySelectorAll(selector).length;
