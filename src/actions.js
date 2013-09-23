@@ -18,6 +18,9 @@ Action.prototype = {
         }
 
         this._exec();
+    },
+    toString: function() {
+        return this.name;
     }
 };
 
@@ -55,6 +58,7 @@ function ExecAction(fn) {
     this._exec = function () {
         fn();
     };
+    this.name = "Executing function " + fn.toString();
 }
 ExecAction.prototype = new Action();
 ExecAction.constructor = ExecAction;

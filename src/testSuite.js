@@ -12,22 +12,30 @@ var results = {
 
 var TestSuite = function TestSuite(name, params) {
     this.name = name;
+    params = params || {};
     this.setUp = params.setUp || function(){};
     this.tearDown = params.tearDown || function(){};
-    this.defaultTimeout = params.defaultTimeout || 2000;
+    this.timeout = params.defaultTimeout || 2000;
+    this.verbose = params.verbose || false;
+    this.socket = null
 
     this.tests = [];
 };
 
 TestSuite.prototype.setSocket = function(socket) {
-    this.scenario = new Scenario(name,socket, this.defaultTimeout);
+    this.socket = socket;
+
+    this.scenario = new Scenario(name, {
+        timeout: this.timeout,
+        verbose: this.verbose
+    });
     this.asserter = new Asserter(this.scenario);
 
-    this.scenario.on('tests-start', this.onTestsStart);
-    this.scenario.on('tests-end', this.onTestsEnd);
-    this.scenario.on('test-success', this.onTestSuccess);
-    this.scenario.on('test-error', this.onTestFail);
-    this.scenario.on('error', this.onProcessError);
+    this.scenario.on('tests-start', this.onTestsStart.bind(this));
+    this.scenario.on('tests-end', this.onTestsEnd.bind(this));
+    this.scenario.on('test-success', this.onTestSuccess.bind(this));
+    this.scenario.on('test-error', this.onTestFail.bind(this));
+    this.scenario.on('error', this.onProcessError.bind(this));
 };
 
 TestSuite.prototype.addTest = function(name, test)  {

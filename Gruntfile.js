@@ -19,8 +19,16 @@ module.exports = function(grunt) {
 
         /* DEV MODE - auto compile & test */
         'watch': {
-            'spatester': {
-                files: ['src/**/*.js', 'test/demoTest.js', 'test/qunit/test.js'],
+            'src': {
+                files: ['src/**/*.js'],
+                tasks: ['browserify']
+            },
+            'testem': {
+                files: ['test/demoTest.js'],
+                tasks: ['browserify']
+            },
+            'qunit': {
+                files: ['test/qunit/test.js'],
                 tasks: ['browserify']
             }
         },
@@ -55,4 +63,5 @@ module.exports = function(grunt) {
     grunt.registerTask('dist', ['jshint','bumpup']);
     grunt.registerTask('dev', ['browserify', 'watch']);
     grunt.registerTask('test', ['browserify', 'testem:ci:spa','testem:ci:qunit']);
+    grunt.registerTask('default', ['watch']);
 };
