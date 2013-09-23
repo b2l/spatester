@@ -47,6 +47,10 @@ Scenario.prototype = {
         this._actions.push(new actions.ExecAction(fn));
         return this;
     },
+    debug: function() {
+        this._actions.push(new actions.DebugAction());
+        return this;
+    },
     registerTestName: function(name) {
         var scenario = this;
         this._actions.push(new actions.ExecAction(function() {

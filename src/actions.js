@@ -49,6 +49,21 @@ WaitAction.prototype._exec = function () {
 actions.WaitAction = WaitAction;
 
 /**
+ * DebugAction
+ * @extend Action
+ *
+ * insert a debug point
+ */
+function DebugAction() {
+}
+DebugAction.prototype = new Action();
+DebugAction.constructor = DebugAction;
+DebugAction.prototype._exec = function() {
+    debugger;
+}
+actions.DebugAction = DebugAction;
+
+/**
  * ExecAction class
  * @extend Action
  *

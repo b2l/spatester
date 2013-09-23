@@ -17,7 +17,7 @@ var demoTestSuite = new TestSuite("demo test suite", {
         document.body.removeChild(input);
         document.body.removeChild(div);
     },
-    verbose: true
+    verbose: false
 });
 
 Testem.useCustomAdapter(function (socket) {
