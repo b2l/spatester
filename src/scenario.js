@@ -28,6 +28,10 @@ Scenario.prototype = {
         this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, callerLine));
         return this;
     },
+    keyboardNoChromeNoIE: function () { //FIXME les keyboards events ne fonctionnent pas bien sous IE et Chrome, il faudrait trouver un polyfill
+        var event = document.createEvent("KeyboardEvent");
+            return !event.initKeyboardEvent
+    },
     fill: function (selector, value, waitForSelector) {
         var callerLine = this._getCallerLine(new Error());
         this._actions.push(new actions.FillAction(selector, value, waitForSelector, callerLine));
