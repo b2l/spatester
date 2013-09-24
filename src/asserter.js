@@ -1,11 +1,11 @@
 
-function Asserter (scenario) {
+function Asserter(scenario) {
     this.scenario = scenario;
 }
 
 
 Asserter.prototype.assertThat = function assertThat(selector) {
-    return new Assertion(selector, this.scenario);
+    return new Assertion(selector, this.scenario, null, null);
 };
 
 /**
@@ -27,7 +27,7 @@ function assert(assertion, flags, message) {
  * Tag chaining possibility
  */
 var _flags = {
-    'to': ['have', 'not'],
+    'to': ['have', 'not', 'be'],
     'have': ['not', 'to'],
     'not': ['to', 'have', 'be'],
     'be': ['not']
@@ -40,7 +40,6 @@ var _flags = {
  * @param scenario
  * @param flag
  * @param parent
- * @returns {*}
  * @constructor
  */
 function Assertion(selector, scenario, flag, parent) {
@@ -194,32 +193,156 @@ Assertion.prototype.checked = function checked(description) {
  * Selected check
  *
  * Check that the node (an option node) is selected
- *
- * @param description
  */
 Assertion.prototype.selected = function selected() {
     var selector = this.selector;
     var assertion = assert(
         function() {
-            return document.querySelector(selector).hasAttribute('selected');
+            var selectNode = null;
+            var node = document.querySelector(selector);
+            while(!selectNode && node) {
+                if (node.tagName.toLowerCase() === 'select') {
+                    selectNode = node;
+                }
+
+                node = node.parentNode || null;
+            }
+
+            var selectedOptions
+            if (selectNode.selectedOptions) {
+                var selectedOptions = selectNode.selectedOptions;
+            } else { // FF does not implement selectedOptions for now
+                selectedOptions  = new Array(selectNode.children[selectNode.selectedIndex]);
+            }
+            var contains = false;
+
+            var expectedOption = document.querySelector(selector);
+            Array.prototype.forEach.call(selectedOptions, function(option) {
+                if (expectedOption === option) {
+                    contains = true;
+                }
+            });
+            return contains;
         },
         this.flags,
-        description
+        ""
     );
-    this.scenario.pushAssert(assertion, "Expect " + selector + " to be checked ");
+    this.scenario.pushAssert(assertion, "Expect " + selector + " to be selected ");
 };
 
-Assertion.prototype.matchSelector = function matchSelector() {
-}
+/**
+ * Selector check
+ *
+ * Check that the node match the given selector
+ *
+ * @param expectedSelector
+ */
+Assertion.prototype.matchSelector = function matchSelector(expectedSelector) {
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            var nodeList = document.querySelectorAll(selector);
+            for (var index in nodeList) {
+                return nodeList[index] === document.querySelector(expectedSelector);
+            }
+        },
+        this.flags,
+        ""
+    );
+
+    this.scenario.pushAssert(assertion, "Expect node " + selector + " to match selector " + expectedSelector);
+
+};
+
+/**
+ * Empty check
+ *
+ * Check that the node content is empty
+ */
 Assertion.prototype.empty = function empty() {
-}
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return document.querySelector(selector).textContent === "";
+        },
+        this.flags,
+        ""
+    );
+    this.scenario.pushAssert(assertion, "Expect node " + selector + " to be empty");
+};
+
+/**
+ * Exist check
+ *
+ * Check that the node is in the DOM
+ */
 Assertion.prototype.exist = function exist() {
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return null !== document.querySelector(selector);
+        },
+        this.flags,
+        ""
+    );
+    this.scenario.pushAssert(assertion, "Expect node " + selector + " to be present");
+};
+
+// Function for testing node visibility
+function isVisible(node) {
+    if ('input' === node.tagName.toLowerCase() && 'hidden' === node.getAttribute('type')) {
+        return false;
+    }
+
+    return !!((node.offsetWidth > 0 || node.offsetHeight > 0 )&& 'none' !== node.style.display && 'hidden' !== node.style.visibility);
 }
+
+
+/**
+ * Hidden check
+ *
+ * Check that the node is in the DOM but hidden
+ */
 Assertion.prototype.hidden = function hidden() {
-}
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return !isVisible(document.querySelector(selector));
+        },
+        this.flags,
+        ""
+    );
+    this.scenario.pushAssert(assertion, "Expect node " + selector + " to be hidden");
+};
+
+/**
+ * Visible check
+ *
+ * Check that the node is in the DOM and visible
+ */
 Assertion.prototype.visible = function visible() {
-}
-Assertion.prototype.html = function html() {
-}
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return isVisible.call(this, document.querySelector(selector));
+        },
+        this.flags,
+        ""
+    );
+    this.scenario.pushAssert(assertion, "Expect node " + selector + " to be visible");
+};
+
+Assertion.prototype.html = function html(expectedHTML) {
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return new RegExp(expectedHTML).test(document.querySelector(selector).innerHTML);
+        },
+        this.flags,
+        ""
+    );
+    this.scenario.pushAssert(assertion, "Expect node " + selector + " to have html " + expectedHTML);
+};
+
 
 module.exports = Asserter;

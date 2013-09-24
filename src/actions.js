@@ -161,6 +161,7 @@ SelectAction.prototype._exec = function () {
 
         // Really select the value
         list.selectedIndex = option.index;
+        option.setAttribute('selected', 'selected');
     } catch (e) {
         throw new Error("Can't select the value " + this.value + " in list " + this.selector, e);
     }

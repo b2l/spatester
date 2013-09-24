@@ -115,7 +115,7 @@ Scenario.prototype = {
             this.emit('test-success', action);
             scenario._process(index + 1);
         } catch (e) {
-            this.emit('test-error', action);
+            this.emit('test-error', action, e);
         }
     },
 

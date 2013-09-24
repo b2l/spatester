@@ -34,7 +34,6 @@ function init(testemSocket) {
     };
 
     function testemTestResult(test, e, testStatus) {
-        results.total++;
         var result = {
             passed: 0,
             failed: 0,
@@ -43,6 +42,8 @@ function init(testemSocket) {
             name: test.name || "",
             items: []
         };
+
+        results.total++;
 
         if (testStatus) {
             result.passed++;

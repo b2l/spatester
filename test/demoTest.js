@@ -17,8 +17,7 @@ var demoTestSuite = new TestSuite("demo test suite", {
         var div = document.getElementById('my-div');
         document.body.removeChild(input);
         document.body.removeChild(div);
-    },
-    verbose: true
+    }
 });
 
 demoTestSuite.addTest("test form input value", function (scenario, asserter) {
@@ -88,42 +87,104 @@ demoTestSuite.addTest("test form radio is checked", function(scenario, asserter)
     asserter.assertThat('#checked').to.have.checked();
 });
 
-//demoTestSuite.addTest("test form radio is not checked", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test option is selected", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test option is not selected", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node match selector", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node does not match selector", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node content is empty", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node content is not empty", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node exist", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node does not exist", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node is hidden", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node is visible", function(scenario, asserter) {
-//
-//});
-//demoTestSuite.addTest("test node contains html", function(scenario, asserter) {
-//
-//});
+demoTestSuite.addTest("test option is selected", function(scenario, asserter) {
+    // Given
+    scenario.exec(function() {
+        var content = "<select id='select'><option value='toto' id='option-toto'>Toto</option><option value='titi' id='option-titi'>Titi</option></select>";
+        document.getElementById('my-div').innerHTML = content;
+    });
+
+    // When
+    scenario.select('#select', 'titi');
+
+    // Then
+    asserter.assertThat('#option-titi').to.be.selected();
+    asserter.assertThat('#option-toto').not.to.be.selected();
+});
+
+demoTestSuite.addTest("test node match selector", function(scenario, asserter) {
+    // Given
+    scenario.exec(function() {
+        var content = "<div class='titi'><a class='my-button' id='button'>Button</a></div>";
+        document.getElementById('my-div').innerHTML = content;
+    });
+
+    // Then
+    asserter.assertThat('#button').to.matchSelector('#my-div .titi .my-button');
+    asserter.assertThat('#button').not.to.matchSelector('#my-div #toto .titi .my-button');
+});
+
+demoTestSuite.addTest("test node content is empty", function(scenario, asserter) {
+    scenario.exec(function() {
+        var content = "toto<div class='titi'><a class='my-button' id='button'></a></div>";
+        document.getElementById('my-div').innerHTML = content;
+    });
+
+    asserter.assertThat('#my-div').not.to.have.empty();
+//    asserter.assertThat('#my-button').to.have.empty();
+});
+
+demoTestSuite.addTest("test node exist", function(scenario, asserter) {
+    asserter.assertThat('#my-div').to.exist();
+
+    scenario.exec(function() {
+        var elem = document.createElement('div');
+        elem.setAttribute('id', 'not-in-dom');
+    });
+
+    asserter.assertThat('#not-in-dom').not.to.exist();
+});
+
+demoTestSuite.addTest("test node is hidden ", function(scenario, asserter) {
+
+    scenario.exec(function() {
+        document.getElementById('my-div').innerHTML = "<p>Toto, il y a du contenu dans ma div</p>"
+    });
+    asserter.assertThat('#my-div').not.to.be.hidden();
+
+    scenario.exec(function() {
+        document.querySelector('#my-div').style.display = 'none';
+    });
+
+    asserter.assertThat('#my-div').to.be.hidden();
+
+    scenario.exec(function() {
+        document.querySelector('#my-div').style.display = 'block';
+        document.querySelector('#my-div').style.visibility = 'hidden';
+    });
+
+    asserter.assertThat('#my-div').to.be.hidden();
+});
+
+demoTestSuite.addTest("test node is visible", function(scenario, asserter) {
+    asserter.assertThat('#my-div').to.be.visible();
+
+    scenario.exec(function() {
+        document.querySelector('#my-div').style.display = 'none';
+    });
+
+    asserter.assertThat('#my-div').not.to.have.visible();
+
+    scenario.exec(function() {
+        document.querySelector('#my-div').style.display = 'block';
+        document.querySelector('#my-div').style.visibility = 'hidden';
+    });
+
+    asserter.assertThat('#my-div').not.to.have.visible();
+});
+
+demoTestSuite.addTest("test node contains html", function(scenario, asserter) {
+    var expected = "<p>Toto, bli bla blou</p>";
+
+    asserter.assertThat('#my-div').not.to.have.html(expected);
+
+    scenario.exec(function() {
+        document.getElementById('my-div').innerHTML = expected;
+    });
+
+    asserter.assertThat('#my-div').to.have.html(expected);
+    asserter.assertThat('#my-div').to.have.html("<p>Toto.*</p>");
+});
 
 window.onload = function() {
     setTimeout(function() {
