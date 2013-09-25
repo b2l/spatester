@@ -4,7 +4,7 @@ function Asserter(scenario) {
 }
 
 
-Asserter.prototype.assertThat = function assertThat(selector) {
+Asserter.prototype.expect = function assertThat(selector) {
     return new Assertion(selector, this.scenario, null, null);
 };
 
@@ -13,11 +13,12 @@ Asserter.prototype.assertThat = function assertThat(selector) {
  *
  * return a function wich throw an error if the assertion is not validate
  */
-function assert(assertion, flags, message) {
+function assert(assertion, flags, messageOK, messageNOK) {
     return function() {
         var ok = flags.not ? !assertion() : assertion();
+        var msg = flags.not ? messageNOK : messageOK;
         if (!ok) {
-            throw new Error(message);
+            throw new Error(msg);
         }
     }
 
@@ -112,7 +113,8 @@ Assertion.prototype.attr = function(attrName, expected) {
                 return document.querySelector(selector).hasAttribute(attrName);
             },
             this.flags,
-            ""
+            "Expect " + selector + " to have attribute " + attrName,
+            "Expect " + selector + " not to have attribute " + attrName
         );
         description = "expect attr " + attrName + " to be set";
     } else {
@@ -121,7 +123,8 @@ Assertion.prototype.attr = function(attrName, expected) {
                 return document.querySelector(selector).getAttribute(attrName) === expected;
             },
             this.flags,
-            ""
+            "Expect " + selector + " to have attribute " + attrName + " with value " + expected,
+            "Expect " + selector + " to have attribute " + attrName + " with value different than " + expected
         );
         description = "expect attr " + attrName + " to have value " + expected;
     }
@@ -144,7 +147,8 @@ Assertion.prototype.value = function(expected, description) {
             return document.querySelector(selector).value === expected;
         },
         this.flags,
-        description
+        "Expect " + selector + " to have value " + expected,
+        "Expect " + selector + " not to have value " + expected
     );
     this.scenario.pushAssert(assertion,  description);
 };
@@ -165,7 +169,8 @@ Assertion.prototype.text = function text(expectedText, description) {
             return regexp.test(document.querySelector(selector).textContent);
         },
         this.flags,
-        description
+        "Expect " + selector + " to contain text " + expectedText,
+        "Expect " + selector + " not to contain text " + expectedText
     );
     this.scenario.pushAssert(assertion, description);
 };
@@ -184,7 +189,8 @@ Assertion.prototype.checked = function checked(description) {
             return document.querySelector(selector).hasAttribute('checked');
         },
         this.flags,
-        description
+        "Expect " + selector + " to be checked",
+        "Expect " + selector + " not to be checked"
     );
     this.scenario.pushAssert(assertion, "Expect " + selector + " to be checked ");
 };
@@ -225,7 +231,8 @@ Assertion.prototype.selected = function selected() {
             return contains;
         },
         this.flags,
-        ""
+        "Expect " + selector + " to be selected",
+        "Expect " + selector + " not to be selected"
     );
     this.scenario.pushAssert(assertion, "Expect " + selector + " to be selected ");
 };
@@ -247,7 +254,8 @@ Assertion.prototype.matchSelector = function matchSelector(expectedSelector) {
             }
         },
         this.flags,
-        ""
+        "Expect " + selector + " to match selector " + expectedSelector,
+        "Expect " + selector + " not to match selector " + expectedSelector
     );
 
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to match selector " + expectedSelector);
@@ -266,7 +274,8 @@ Assertion.prototype.empty = function empty() {
             return document.querySelector(selector).textContent === "";
         },
         this.flags,
-        ""
+        "Expect " + selector + " to be empty",
+        "Expect " + selector + " not to be empty"
     );
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to be empty");
 };
@@ -283,7 +292,8 @@ Assertion.prototype.exist = function exist() {
             return null !== document.querySelector(selector);
         },
         this.flags,
-        ""
+        "Expect " + selector + " to be in the DOM",
+        "Expect " + selector + " not to be in the DOM"
     );
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to be present");
 };
@@ -327,7 +337,8 @@ Assertion.prototype.visible = function visible() {
             return isVisible.call(this, document.querySelector(selector));
         },
         this.flags,
-        ""
+        "Expect " + selector + " to visible",
+        "Expect " + selector + " not to be visible"
     );
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to be visible");
 };
@@ -339,7 +350,8 @@ Assertion.prototype.html = function html(expectedHTML) {
             return new RegExp(expectedHTML).test(document.querySelector(selector).innerHTML);
         },
         this.flags,
-        ""
+        "Expect " + selector + " to be hidden",
+        "Expect " + selector + " not to be hidden"
     );
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to have html " + expectedHTML);
 };

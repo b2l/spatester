@@ -7,6 +7,7 @@ Testem.useCustomAdapter(function (socket) {
 function init(testemSocket) {
 
     var test = [];
+    var id = 0;
     var results = {
         failed: 0,
         passed: 0,
@@ -15,14 +16,19 @@ function init(testemSocket) {
     };
 
     TestSuite.prototype.onTestFail = function onTestFail(test, e) {
-        testemSocket.emit('test-result', testemTestResult(test, e, false));
+        var testResult = testemTestResult(test, e, false);
+        testemSocket.emit('test-result', testResult);
+        testemSocket.emit('all-test-results', results);
     };
     TestSuite.prototype.onTestSuccess = function onTestSuccess(test, e) {
         testemSocket.emit('test-result', testemTestResult(test, e, true));
     };
 
-    TestSuite.prototype.onProcessError = function onProcessError(test, e) {
-        testemSocket.emit('all-test-results', results);
+    TestSuite.prototype.onTestExecError= function(action, e) {
+        var testResult = testemTestResult(action, e, false);
+        testemSocket.emit('test-result', testResult);
+        testemSocket.emit('error', [this.scenario.currentTest, e.message, "Stack ", action.callerLine].join('\n'));
+
     };
 
     TestSuite.prototype.onTestsStart = function onTestsStart() {
@@ -38,7 +44,7 @@ function init(testemSocket) {
             passed: 0,
             failed: 0,
             total: 1,
-            id: 0,
+            id: id,
             name: test.name || "",
             items: []
         };
@@ -49,16 +55,18 @@ function init(testemSocket) {
             result.passed++;
             results.passed++;
         } else {
-            result.failed++;
             results.failed++;
+            result.failed++;
             result.items.push({
                 passed: false,
-                message: test.name || "",
-                stack: e.stack ? e.stack : undefined
+                message: e.message,
+                stack: test.callerLine ? test.callerLine : undefined
             });
         }
 
         results.tests.push(result);
+
+        id++;
 
         return result;
     }

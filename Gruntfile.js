@@ -28,14 +28,18 @@ module.exports = function(grunt) {
                 tasks: ['browserify']
             },
             'qunit': {
-                files: ['test/qunit/test.js'],
+                files: ['test/qunit/*.js'],
                 tasks: ['browserify']
             }
         },
 
         browserify: {
+            options: {
+                debug: true
+            },
             'test/compiled.js': ['test/demoTest.js'],
-            'test/qunit/compiled.js': ['test/qunit/test.js']
+            'test/qunit/compiled/scenario.js': ['test/qunit/scenario.js'],
+            'test/qunit/compiled/asserter.js': ['test/qunit/asserter.js']
         },
 
         testem: {
@@ -49,7 +53,7 @@ module.exports = function(grunt) {
                 }
             },
             qunit : {
-                src: [ 'test/qunit/compiled.js' ],
+                src: [ 'test/qunit/compiled/*.js' ],
                 options: {
                     framework: 'qunit',
                     'launch_in_ci' : [
