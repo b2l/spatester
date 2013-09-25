@@ -1,4 +1,5 @@
 var Asserter = require('./asserter');
+var actions = require('./actions');
 var Scenario = require('./scenario');
 var MicroEE = require('microee');
 
@@ -7,7 +8,7 @@ var TestSuite = function TestSuite(name, params) {
     params = params || {};
     this.setUp = params.setUp || function(){};
     this.tearDown = params.tearDown || function(){};
-    this.timeout = params.defaultTimeout || 2000;
+    this.timeout = params.timeout || 2000;
     this.verbose = params.verbose || false;
     this.tests = [];
 
@@ -24,7 +25,7 @@ TestSuite.prototype.bindEvent = function() {
     this.scenario.on('tests-end', this.onTestsEnd.bind(this));
     this.scenario.on('test-success', this.onTestSuccess.bind(this));
     this.scenario.on('test-error', this.onTestFail.bind(this));
-    this.scenario.on('error', this.onProcessError.bind(this));
+    this.scenario.on('exec-error', this.onTestExecError.bind(this));
 };
 
 TestSuite.prototype.addTest = function(name, test)  {
@@ -33,9 +34,9 @@ TestSuite.prototype.addTest = function(name, test)  {
     this.tests.push(test);
 
 
-    this.scenario.exec(this.setUp);
+    this.scenario._actions.push(new actions.ExecAction(this.setUp));
     test.call(this, this.scenario, this.asserter);
-    this.scenario.exec(this.tearDown);
+    this.scenario._actions.push(new actions.ExecAction(this.tearDown));
 };
 
 TestSuite.prototype.run = function()  {
@@ -47,7 +48,7 @@ TestSuite.prototype.onTestsStart = function() {};
 TestSuite.prototype.onTestsEnd = function() {};
 TestSuite.prototype.onTestSuccess = function() {};
 TestSuite.prototype.onTestFail = function() {};
-TestSuite.prototype.onProcessError = function() {};
+TestSuite.prototype.onTestExecError = function() {};
 
 MicroEE.mixin(TestSuite);
 

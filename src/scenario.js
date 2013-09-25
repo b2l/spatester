@@ -8,19 +8,12 @@ function Scenario(label, params) {
     this._actions = [];
     this.timeout = params.timeout;
     this.verbose = params.verbose;
-
-    this.results = {
-        failed: 0,
-        passed: 0,
-        total: 0,
-        tests: []
-    };
 }
 
 Scenario.prototype = {
-    click: function (selector, waitForSelector) {
+    click: function (selector) {
         var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.ClickAction(selector, waitForSelector, callerLine));
+        this._actions.push(new actions.ClickAction(selector, callerLine));
         return this;
     },
     keyboard: function (selector, action, chromeCode, ffCode) {
@@ -28,23 +21,25 @@ Scenario.prototype = {
         this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, callerLine));
         return this;
     },
-    fill: function (selector, value, waitForSelector) {
+    fill: function (selector, value) {
         var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.FillAction(selector, value, waitForSelector, callerLine));
-        return this.wait(selector + "[value='" + value + "']");
+        this._actions.push(new actions.FillAction(selector, value, callerLine));
+        return this.wait(selector + "[value='" + value + "']", 3);
     },
-    select: function (listSelector, value, waitForSelector) {
+    select: function (listSelector, value) {
         var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.SelectAction(listSelector, value, waitForSelector, callerLine));
+        this._actions.push(new actions.SelectAction(listSelector, value, callerLine));
         return this;
     },
-    wait: function (selector) {
-        var callerLine = this._getCallerLine(new Error());
+    wait: function (selector, line) {
+        line = line || 2;
+        var callerLine = this._getCallerLine(new Error(), line);
         this._actions.push(new actions.WaitAction(selector, callerLine));
         return this;
     },
     exec: function (fn) {
-        this._actions.push(new actions.ExecAction(fn));
+        var callerLine = this._getCallerLine(new Error(), 2);
+        this._actions.push(new actions.ExecAction(fn, callerLine));
         return this;
     },
     debug: function() {
@@ -64,16 +59,34 @@ Scenario.prototype = {
     },
 
     pushAssert: function (assertFunction, description) {
-        var callerLine = this._getCallerLine(new Error());
+        var callerLine = this._getCallerLine(new Error(), 3);
         this._actions.push(new actions.TestAction({ test: assertFunction, description: description}, callerLine));
         return this;
     },
 
-    _getCallerLine: function (error) {
+    _getCallerLine: function (error, stackLine) {
+        stackLine = stackLine || 1;
         if (error.stack) {
-            return error.stack.split("\n")[1];
+            // FF
+            var trace = error.stack.split('\n');
+            var matchingLine = trace.filter(function(line) {
+                return /^\[1\].*/.test(line);
+            })[0];
+            if (!matchingLine) {
+                matchingLine = error.stack.split("\n")[stackLine];
+            }
+            return matchingLine;
+        } else {
+            var callstack = [];
+            var currentFunction = arguments.callee.caller;
+            while (currentFunction) {
+                var fn = currentFunction.toString();
+                var fname = fn.substring(fn.indexOf('"function"') + 8, fn.indexOf('')) || 'anonymous';
+                callstack.push(fname);
+                currentFunction = currentFunction.caller;
+            }
         }
-        return "\nDon't test on that shit !";
+        return "\nNo stack trace available on IE";
     },
 
     _process: function (index) {
@@ -95,17 +108,17 @@ Scenario.prototype = {
     },
 
     _processAction: function (scenario, index, action) {
+        if (this.verbose) {
+            console.log(action.toString());
+        }
         try {
-            if (this.verbose) {
-                console.log(action.toString());
-            }
             action.exec();
             scenario._process(index + 1);
         } catch (e) {
-            if (this.verbose) {
-                console.log("ERROR action " + action);
-            }
-            this._onError(scenario, index, action, e);
+            action.name = scenario.currentTest;
+            this.emit('exec-error', action, e);
+            scenario._process(index + 1);
+            // On ne continue pas après une erreur d'execution
         }
     },
 
@@ -149,7 +162,7 @@ Scenario.prototype = {
     },
 
     _onError: function (scenario, index, action, e) {
-        this.emit('error', action, e);
+        this.emit('exec-error', action, e);
     }
 };
 
