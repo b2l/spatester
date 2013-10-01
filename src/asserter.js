@@ -1,4 +1,3 @@
-
 function Asserter(scenario) {
     this.scenario = scenario;
 }
@@ -14,13 +13,13 @@ Asserter.prototype.expect = function assertThat(selector) {
  * return a function wich throw an error if the assertion is not validate
  */
 function assert(assertion, flags, messageOK, messageNOK) {
-    return function() {
+    return function () {
         var ok = flags.not ? !assertion() : assertion();
         var msg = flags.not ? messageNOK : messageOK;
         if (!ok) {
             throw new Error(msg);
         }
-    }
+    };
 
 }
 
@@ -32,7 +31,7 @@ var _flags = {
     'have': ['not', 'to'],
     'not': ['to', 'have', 'be'],
     'be': ['not']
-}
+};
 
 /**
  * Assertion constructor
@@ -43,19 +42,19 @@ var _flags = {
  * @param parent
  * @constructor
  */
-function Assertion(selector, scenario, flag, parent) {
+function Assertion(selector, scenario, flag, parent) {
     this.selector = selector;
     this.flags = {};
     this.scenario = scenario;
 
     // Add sub property in flags for fluent api
-    if (undefined != parent) {
+    if (undefined !== parent) {
         this.flags[flag] = true;
 
         // Set flag property on the parent
-        for (var i in parent.flags) {
-            if (parent.flags.hasOwnProperty(i)) {
-                this.flags[i] = true;
+        for (var prop in parent.flags) {
+            if (parent.flags.hasOwnProperty(prop)) {
+                this.flags[prop] = true;
             }
         }
     }
@@ -64,9 +63,12 @@ function Assertion(selector, scenario, flag, parent) {
     var self = this;
 
     if (flags) {
-        for (var i = 0; i < flags.length; i++) {
+        var i = 0;
+        for (i; i < flags.length; i++) {
             // No recursion
-            if (this.flags[flags[i]]) continue;
+            if (this.flags[flags[i]]) {
+                continue;
+            }
 
             var name = flags[i];
             var assertion = new Assertion(selector, scenario, name, this);
@@ -74,9 +76,9 @@ function Assertion(selector, scenario, flag, parent) {
             if ('function' == typeof Assertion.prototype[name]) {
                 // Clone the method. make sure we don't touch the prototype reference
                 var old = this[name];
-                this[name] = function() {
+                this[name] = function () {
                     return old.apply(self, arguments);
-                }
+                };
 
                 for (var fn in Assertion.prototype) {
                     if (Assertion.prototype.hasOwnProperty(fn) && fn != name) {
@@ -102,14 +104,14 @@ function Assertion(selector, scenario, flag, parent) {
  * @param expected
  * @returns {*}
  */
-Assertion.prototype.attr = function(attrName, expected) {
+Assertion.prototype.attr = function (attrName, expected) {
     var selector = this.selector;
     var assertion;
     var description;
 
     if (undefined === expected) {
         assertion = assert(
-            function() {
+            function () {
                 return document.querySelector(selector).hasAttribute(attrName);
             },
             this.flags,
@@ -119,7 +121,7 @@ Assertion.prototype.attr = function(attrName, expected) {
         description = "expect attr " + attrName + " to be set";
     } else {
         assertion = assert(
-            function() {
+            function () {
                 return document.querySelector(selector).getAttribute(attrName) === expected;
             },
             this.flags,
@@ -140,17 +142,17 @@ Assertion.prototype.attr = function(attrName, expected) {
  * @param description
  * @returns {*}
  */
-Assertion.prototype.value = function(expected, description) {
+Assertion.prototype.value = function (expected, description) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return document.querySelector(selector).value === expected;
         },
         this.flags,
         "Expect " + selector + " to have value " + expected,
         "Expect " + selector + " not to have value " + expected
     );
-    this.scenario.pushAssert(assertion,  description);
+    this.scenario.pushAssert(assertion, description);
 };
 
 /**
@@ -164,7 +166,7 @@ Assertion.prototype.value = function(expected, description) {
 Assertion.prototype.text = function text(expectedText, description) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             var regexp = new RegExp('.*' + expectedText + '.*');
             return regexp.test(document.querySelector(selector).textContent);
         },
@@ -185,7 +187,7 @@ Assertion.prototype.text = function text(expectedText, description) {
 Assertion.prototype.checked = function checked(description) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return document.querySelector(selector).hasAttribute('checked');
         },
         this.flags,
@@ -203,10 +205,10 @@ Assertion.prototype.checked = function checked(description) {
 Assertion.prototype.selected = function selected() {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             var selectNode = null;
             var node = document.querySelector(selector);
-            while(!selectNode && node) {
+            while (!selectNode && node) {
                 if (node.tagName.toLowerCase() === 'select') {
                     selectNode = node;
                 }
@@ -214,16 +216,16 @@ Assertion.prototype.selected = function selected() {
                 node = node.parentNode || null;
             }
 
-            var selectedOptions
+            var selectedOptions;
             if (selectNode.selectedOptions) {
-                var selectedOptions = selectNode.selectedOptions;
+                selectedOptions = selectNode.selectedOptions;
             } else { // FF does not implement selectedOptions for now
-                selectedOptions  = new Array(selectNode.children[selectNode.selectedIndex]);
+                selectedOptions = new Array(selectNode.children[selectNode.selectedIndex]);
             }
             var contains = false;
 
             var expectedOption = document.querySelector(selector);
-            Array.prototype.forEach.call(selectedOptions, function(option) {
+            Array.prototype.forEach.call(selectedOptions, function (option) {
                 if (expectedOption === option) {
                     contains = true;
                 }
@@ -247,7 +249,7 @@ Assertion.prototype.selected = function selected() {
 Assertion.prototype.matchSelector = function matchSelector(expectedSelector) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             var nodeList = document.querySelectorAll(selector);
             for (var index in nodeList) {
                 return nodeList[index] === document.querySelector(expectedSelector);
@@ -270,7 +272,7 @@ Assertion.prototype.matchSelector = function matchSelector(expectedSelector) {
 Assertion.prototype.empty = function empty() {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return document.querySelector(selector).textContent === "";
         },
         this.flags,
@@ -288,7 +290,7 @@ Assertion.prototype.empty = function empty() {
 Assertion.prototype.exist = function exist() {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return null !== document.querySelector(selector);
         },
         this.flags,
@@ -304,7 +306,7 @@ function isVisible(node) {
         return false;
     }
 
-    return !!((node.offsetWidth > 0 || node.offsetHeight > 0 )&& 'none' !== node.style.display && 'hidden' !== node.style.visibility);
+    return !!((node.offsetWidth > 0 || node.offsetHeight > 0 ) && 'none' !== node.style.display && 'hidden' !== node.style.visibility);
 }
 
 
@@ -316,7 +318,7 @@ function isVisible(node) {
 Assertion.prototype.hidden = function hidden() {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return !isVisible(document.querySelector(selector));
         },
         this.flags,
@@ -333,7 +335,7 @@ Assertion.prototype.hidden = function hidden() {
 Assertion.prototype.visible = function visible() {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return isVisible.call(this, document.querySelector(selector));
         },
         this.flags,
@@ -346,7 +348,7 @@ Assertion.prototype.visible = function visible() {
 Assertion.prototype.html = function html(expectedHTML) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return new RegExp(expectedHTML).test(document.querySelector(selector).innerHTML);
         },
         this.flags,
@@ -356,29 +358,29 @@ Assertion.prototype.html = function html(expectedHTML) {
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to have html " + expectedHTML);
 };
 
-Assertion.prototype.true = function (fn) {
+Assertion.prototype.returnTrue = function (fn) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return fn.call(this, selector);
         },
         this.flags,
         "expect function " + fn + " to return true",
         "expect function " + fn + " to return false"
-    )
+    );
     this.scenario.pushAssert(assertion, "Expect function " + fn + " to be true");
 };
 
-Assertion.prototype.false = function (fn) {
+Assertion.prototype.returnFalse = function (fn) {
     var selector = this.selector;
     var assertion = assert(
-        function() {
+        function () {
             return !fn.call(this, selector);
         },
         this.flags,
         "expect function " + fn + " to return false",
         "expect function " + fn + " to return true"
-    )
+    );
     this.scenario.pushAssert(assertion, "Expect function " + fn + " to be false");
 };
 

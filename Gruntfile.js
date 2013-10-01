@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
@@ -10,8 +10,11 @@ module.exports = function(grunt) {
     grunt.initConfig({
 
         /* Check JS syntax*/
-        'jshint':{
-            all: ['Gruntfile.js', 'src/*.js']
+        'jshint': {
+            all: ['Gruntfile.js', 'src/*.js'],
+            options: {
+                jshintrc: '.jshintrc'
+            }
         },
 
         /* Update version */
@@ -43,20 +46,20 @@ module.exports = function(grunt) {
         },
 
         testem: {
-            spa : {
+            spa: {
                 src: [ 'test/compiled.js' ],
                 options: {
                     framework: 'custom',
-                    'launch_in_ci' : [
+                    'launch_in_ci': [
                         'chromium'
                     ]
                 }
             },
-            qunit : {
+            qunit: {
                 src: [ 'test/qunit/compiled/*.js' ],
                 options: {
                     framework: 'qunit',
-                    'launch_in_ci' : [
+                    'launch_in_ci': [
                         'chromium'
                     ]
                 }
@@ -65,8 +68,8 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('build', ['jshint']);
-    grunt.registerTask('dist', ['jshint','bumpup']);
+    grunt.registerTask('dist', ['jshint', 'bumpup']);
     grunt.registerTask('dev', ['browserify', 'watch']);
-    grunt.registerTask('test', ['browserify', 'testem:ci:spa','testem:ci:qunit']);
+    grunt.registerTask('test', ['browserify', 'testem:ci:spa', 'testem:ci:qunit']);
     grunt.registerTask('default', ['watch']);
 };

@@ -1,4 +1,3 @@
-
 /**
  * Action class
  * @abstract
@@ -19,7 +18,7 @@ Action.prototype = {
 
         this._exec();
     },
-    toString: function() {
+    toString: function () {
         return this.name;
     }
 };
@@ -33,7 +32,7 @@ Action.prototype = {
 function WaitAction(selector, callerLine) {
     this.waitFor = function () {
         var res = document.querySelector(selector);
-        if(!res) {
+        if (!res) {
             throw new Error();
         }
         return res;
@@ -58,9 +57,9 @@ function DebugAction() {
 }
 DebugAction.prototype = new Action();
 DebugAction.constructor = DebugAction;
-DebugAction.prototype._exec = function() {
+DebugAction.prototype._exec = function () {
     debugger;
-}
+};
 actions.DebugAction = DebugAction;
 
 /**
@@ -76,7 +75,7 @@ function ExecAction(fn, callerLine) {
 }
 ExecAction.prototype = new Action();
 ExecAction.constructor = ExecAction;
-ExecAction.prototype._exec = function() {
+ExecAction.prototype._exec = function () {
     this.fn();
 };
 

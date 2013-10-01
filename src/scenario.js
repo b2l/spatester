@@ -16,12 +16,12 @@ Scenario.prototype = {
         this._actions.push(new actions.ClickAction(selector, callerLine));
         return this;
     },
-	dblclick: function (selector) {
+    dblclick: function (selector) {
         var callerLine = this._getCallerLine(new Error());
         this._actions.push(new actions.DoubleClickAction(selector, callerLine));
         return this;
     },
-    keyboard: function (selector, action, chromeCode, ffCode) {
+    keyboard: function (selector, action, chromeCode, ffCode, shiftKeyArg) {
         var callerLine = this._getCallerLine(new Error());
         this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, shiftKeyArg, callerLine));
         return this;
@@ -29,7 +29,7 @@ Scenario.prototype = {
     // Feature detection - soit faire en sorte que scenario.keyboard marche bien tout le temps, soit fournir une api de feature detection
     keyboardNoChromeNoIE: function () { //FIXME les keyboards events ne fonctionnent pas bien sous IE et Chrome, il faudrait trouver un polyfill
         var event = document.createEvent("KeyboardEvent");
-            return !event.initKeyboardEvent;
+        return !event.initKeyboardEvent;
     },
     fill: function (selector, value) {
         var callerLine = this._getCallerLine(new Error());
@@ -52,13 +52,13 @@ Scenario.prototype = {
         this._actions.push(new actions.ExecAction(fn, callerLine));
         return this;
     },
-    debug: function() {
+    debug: function () {
         this._actions.push(new actions.DebugAction());
         return this;
     },
-    registerTestName: function(name) {
+    registerTestName: function (name) {
         var scenario = this;
-        this._actions.push(new actions.ExecAction(function() {
+        this._actions.push(new actions.ExecAction(function () {
             scenario.currentTest = name;
         }));
     },
@@ -79,8 +79,8 @@ Scenario.prototype = {
         if (error.stack) {
             // FF
             var trace = error.stack.split('\n');
-            var matchingLine = trace.filter(function(line) {
-                return /^\[1\].*/.test(line);
+            var matchingLine = trace.filter(function (line) {
+                return (/^\[1\].*/).test(line);
             })[0];
             if (!matchingLine) {
                 matchingLine = error.stack.split("\n")[stackLine];
@@ -104,7 +104,7 @@ Scenario.prototype = {
         var scenario = this;
 
         if (!action) {
-            this.emit('tests-end')
+            this.emit('tests-end');
         }
         else if (action.waitFor) {
             this._processWaitFor(scenario, index, action);
@@ -158,7 +158,7 @@ Scenario.prototype = {
             } catch (e) {
                 if (new Date().getTime() - start > this.timeout) {
                     if (this.verbose) {
-                        console.log("Wait for timeout")
+                        console.log("Wait for timeout");
                     }
                     this._onError(scenario, index, action, e);
                 } else {
