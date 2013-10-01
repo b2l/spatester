@@ -64,6 +64,7 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.registerTask('build', ['jshint']);
     grunt.registerTask('dist', ['jshint','bumpup']);
     grunt.registerTask('dev', ['browserify', 'watch']);
     grunt.registerTask('test', ['browserify', 'testem:ci:spa','testem:ci:qunit']);
