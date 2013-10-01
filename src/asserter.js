@@ -356,5 +356,30 @@ Assertion.prototype.html = function html(expectedHTML) {
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to have html " + expectedHTML);
 };
 
+Assertion.prototype.true = function (fn) {
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return fn.call(this, selector);
+        },
+        this.flags,
+        "expect function " + fn + " to return true",
+        "expect function " + fn + " to return false"
+    )
+    this.scenario.pushAssert(assertion, "Expect function " + fn + " to be true");
+};
+
+Assertion.prototype.false = function (fn) {
+    var selector = this.selector;
+    var assertion = assert(
+        function() {
+            return !fn.call(this, selector);
+        },
+        this.flags,
+        "expect function " + fn + " to return false",
+        "expect function " + fn + " to return true"
+    )
+    this.scenario.pushAssert(assertion, "Expect function " + fn + " to be false");
+};
 
 module.exports = Asserter;

@@ -186,6 +186,19 @@ demoTestSuite.addTest("test node contains html", function(scenario, asserter) {
     asserter.expect('#my-div').to.have.html("<p>Toto.*</p>");
 });
 
+
+demoTestSuite.addTest("we should assert with function returning true", function(scenario, asserter) {
+    asserter.expect('body').to.be.true(function(bodyNode) {
+        return true;
+    });
+});
+
+demoTestSuite.addTest("we should assert with function returning false", function(scenario, asserter) {
+    asserter.expect('body').to.be.false(function(bodyNode) {
+        return false;
+    });
+});
+
 window.onload = function() {
     setTimeout(function() {
         demoTestSuite.run();
