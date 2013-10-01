@@ -139,7 +139,7 @@ Scenario.prototype = {
             passed: 0,
             failed: 0,
             total: 0,
-            name: action.name,
+            name: action.name || "",
             items: []
         };
         result.passed++;
@@ -156,7 +156,7 @@ Scenario.prototype = {
             passed: 0,
             failed: 0,
             total: 0,
-            name: this.currentTest + " -> " + action.name,
+            name: this.currentTest + " -> " + action.name || "",
             items: []
         };
         result.failed++;
