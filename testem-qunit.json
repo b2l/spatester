@@ -1,0 +1,7 @@
+{
+  "framework": "qunit",
+  "src_files": [
+    "test/qunit/compiled/*.js"
+  ],
+  "launch_in_dev": ["chromium"]
+}

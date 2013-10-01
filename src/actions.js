@@ -18,6 +18,9 @@ Action.prototype = {
         }
 
         this._exec();
+    },
+    toString: function() {
+        return this.name;
     }
 };
 
@@ -29,9 +32,9 @@ Action.prototype = {
  */
 function WaitAction(selector, callerLine) {
     this.waitFor = function () {
-        var res =  document.querySelector(selector);
+        var res = document.querySelector(selector);
         if(!res) {
-            throw new Error("Can't find element matching '"+selector+"'");
+            throw new Error();
         }
         return res;
     };
@@ -46,18 +49,36 @@ WaitAction.prototype._exec = function () {
 actions.WaitAction = WaitAction;
 
 /**
+ * DebugAction
+ * @extend Action
+ *
+ * insert a debug point
+ */
+function DebugAction() {
+}
+DebugAction.prototype = new Action();
+DebugAction.constructor = DebugAction;
+DebugAction.prototype._exec = function() {
+    debugger;
+}
+actions.DebugAction = DebugAction;
+
+/**
  * ExecAction class
  * @extend Action
  *
  * Execute a function in the DOM
  */
-function ExecAction(fn) {
-    this._exec = function () {
-        fn();
-    };
+function ExecAction(fn, callerLine) {
+    this.fn = fn;
+    this.name = "Executing function " + fn.toString();
+    this.callerLine = callerLine;
 }
 ExecAction.prototype = new Action();
 ExecAction.constructor = ExecAction;
+ExecAction.prototype._exec = function() {
+    this.fn();
+};
 
 actions.ExecAction = ExecAction;
 
@@ -67,9 +88,8 @@ actions.ExecAction = ExecAction;
  *
  * Click on a given selector
  */
-function ClickAction(selector, waitFor, callerLine) {
+function ClickAction(selector, callerLine) {
     this.selector = selector;
-    this.waitFor = waitFor;
     this.name = "click on element matching selector " + selector;
     this.callerLine = callerLine;
 }
@@ -91,9 +111,8 @@ actions.ClickAction = ClickAction;
  *
  * DoubleClick on a given selector
  */
-function DoubleClickAction(selector, waitFor, callerLine) {
+function DoubleClickAction(selector, callerLine) {
     this.selector = selector;
-    this.waitFor = waitFor;
     this.name = "double click on element matching selector " + selector;
     this.callerLine = callerLine;
 }
@@ -150,10 +169,9 @@ actions.KeyboardAction = KeyboardAction;
  *
  * Select the given value from the given list
  */
-function SelectAction(selector, value, waitFor, callerLine) {
+function SelectAction(selector, value, callerLine) {
     this.selector = selector;
     this.value = value;
-    this.waitFor = waitFor;
     this.name = "Select option with value " + value + " in the list matching the selector " + selector;
     this.callerLine = callerLine;
 }
@@ -182,10 +200,9 @@ actions.SelectAction = SelectAction;
  *
  * Set the value of a given field with the given value
  */
-function FillAction(selector, value, waitFor, callerLine) {
+function FillAction(selector, value, callerLine) {
     this.selector = selector;
     this.value = value;
-    this.waitFor = waitFor;
     this.name = "Fill input matching selector " + selector + " with value " + value;
     this.callerLine = callerLine;
 }
@@ -217,8 +234,6 @@ function TestAction(assertion, callerLine) {
 }
 TestAction.prototype = new Action();
 TestAction.constructor = TestAction;
-
-
 TestAction.prototype._exec = function () {
     this.assertion.test();
 };

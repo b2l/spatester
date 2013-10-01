@@ -1,0 +1,8 @@
+{
+  "framework": "custom",
+  "src_files": [
+    "test/compiled.js"
+  ],
+  "launch_in_ci": ["firefox", "chromium", "chrome"],
+  "launch_in_dev": ["chromium"]
+}
