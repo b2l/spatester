@@ -48,7 +48,7 @@ function Assertion(selector, scenario, flag, parent) {
     this.scenario = scenario;
 
     // Add sub property in flags for fluent api
-    if (undefined !== parent) {
+    if (parent) {
         this.flags[flag] = true;
 
         // Set flag property on the parent
