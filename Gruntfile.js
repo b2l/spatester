@@ -18,7 +18,14 @@ module.exports = function (grunt) {
         },
 
         /* Update version */
-        'bumpup': ['package.json'],
+        'bumpup': {
+            options: {
+                version: function (old, type) {
+                    return old.replace(/([\d])+$/, grunt.option('wc-version'));
+                }
+            },
+            file: 'package.json'
+        },
 
         /* DEV MODE - auto compile & test */
         'watch': {
