@@ -2,7 +2,7 @@
     "name": "spatester",
     "version": "1.0.0",
     "description": "Single Page App tester",
-    "main": "src/testSuite.js",
+    "main": "src/testem-adapter.js",
     "repository": {
         "type": "git",
         "url": "git://github.com:viareport/spatester.git"
