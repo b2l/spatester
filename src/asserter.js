@@ -94,6 +94,67 @@ function Assertion(selector, scenario, flag, parent) {
     return this;
 }
 
+function isNode(selector) {
+    return !selector instanceof String;
+}
+
+Assertion.prototype.children = function children(childrenSelector) {
+    var selector = this.selector + " " + childrenSelector;
+    return new Assertion(selector, this.scenario, null, null);
+};
+
+Assertion.prototype.child = function child(childrenSelector) {
+    var selector = this.selector + " " + childrenSelector;
+    return new Assertion(selector, this.scenario, null, null);
+};
+
+/**
+ * nodeLength check
+ *
+ * Check is querySelectorAll(this.selector) return the expected number of node
+ *
+ * @param expectedLength
+ * @returns {*}
+ */
+Assertion.prototype.nodeLength = function nodeLength(expectedLength) {
+    var selector = this.selector;
+    var description = "Expect " + selector + " to match " + expectedLength + " node in the DOM";
+
+    var assertion = assert(
+        function () {
+            return document.querySelectorAll(selector).length === expectedLength;
+        },
+        this.flags,
+        "Expect " + selector + " to match " + expectedLength + " node in the DOM",
+        "Expect " + selector + " NOT to match " + expectedLength + " node in the DOM"
+    );
+
+    this.scenario.pushAssert(assertion, description);
+};
+
+/**
+ * Class check
+ *
+ * Check if the given class is present
+ *
+ * @param className
+ * @returns {*}
+ */
+Assertion.prototype.className = function (className) {
+    var selector = this.selector;
+
+    var assertion = assert(
+        function () {
+            return document.querySelector(selector).classList.contains(className);
+        },
+        this.flags,
+        "Expect " + selector + " to have class " + className,
+        "Expect " + selector + " not to have class " + className
+    );
+    var description = "expect " + selector + " to have Class " + className;
+    this.scenario.pushAssert(assertion, description);
+};
+
 /**
  * Attribute check
  *
@@ -112,7 +173,11 @@ Assertion.prototype.attr = function (attrName, expected) {
     if (undefined === expected) {
         assertion = assert(
             function () {
-                return document.querySelector(selector).hasAttribute(attrName);
+                return isNode(selector) ?
+                    selector.hasAttribute(attrName) :
+                    document.querySelector(selector).hasAttribute(attrName);
+
+
             },
             this.flags,
             "Expect " + selector + " to have attribute " + attrName,
@@ -122,7 +187,9 @@ Assertion.prototype.attr = function (attrName, expected) {
     } else {
         assertion = assert(
             function () {
-                return document.querySelector(selector).getAttribute(attrName) === expected;
+                return isNode(selector) ?
+                    selector.getAttribute(attrName) === expected :
+                    document.querySelector(selector).getAttribute(attrName) === expected;
             },
             this.flags,
             "Expect " + selector + " to have attribute " + attrName + " with value " + expected,
@@ -146,7 +213,9 @@ Assertion.prototype.value = function (expected, description) {
     var selector = this.selector;
     var assertion = assert(
         function () {
-            return document.querySelector(selector).value === expected;
+            return isNode(selector) ?
+                selector.value === expected :
+                document.querySelector(selector).value === expected;
         },
         this.flags,
         "Expect " + selector + " to have value " + expected,
@@ -168,7 +237,10 @@ Assertion.prototype.text = function text(expectedText, description) {
     var assertion = assert(
         function () {
             var regexp = new RegExp('.*' + expectedText + '.*');
-            return regexp.test(document.querySelector(selector).textContent);
+
+            return isNode(selector) ?
+                regexp.test(selector.textContent) :
+                regexp.test(document.querySelector(selector).textContent);
         },
         this.flags,
         "Expect " + selector + " to contain text " + expectedText,
@@ -188,7 +260,9 @@ Assertion.prototype.checked = function checked(description) {
     var selector = this.selector;
     var assertion = assert(
         function () {
-            return document.querySelector(selector).hasAttribute('checked');
+            return isNode(selector) ?
+                selector.hasAttribute('checked') :
+                document.querySelector(selector).hasAttribute('checked');
         },
         this.flags,
         "Expect " + selector + " to be checked",
@@ -207,7 +281,8 @@ Assertion.prototype.selected = function selected() {
     var assertion = assert(
         function () {
             var selectNode = null;
-            var node = document.querySelector(selector);
+            var node = isNode(selector) ? selector : document.querySelector(selector);
+
             while (!selectNode && node) {
                 if (node.tagName.toLowerCase() === 'select') {
                     selectNode = node;
@@ -273,7 +348,9 @@ Assertion.prototype.empty = function empty() {
     var selector = this.selector;
     var assertion = assert(
         function () {
-            return document.querySelector(selector).textContent === "";
+            return isNode(selector) ?
+                selector.textContent === "" :
+                document.querySelector(selector).textContent === "";
         },
         this.flags,
         "Expect " + selector + " to be empty",
@@ -319,7 +396,9 @@ Assertion.prototype.hidden = function hidden() {
     var selector = this.selector;
     var assertion = assert(
         function () {
-            return !isVisible(document.querySelector(selector));
+            return isNode(selector) ?
+                !isVisible(selector) :
+                !isVisible(document.querySelector(selector));
         },
         this.flags,
         ""
@@ -336,7 +415,9 @@ Assertion.prototype.visible = function visible() {
     var selector = this.selector;
     var assertion = assert(
         function () {
-            return isVisible.call(this, document.querySelector(selector));
+            return isNode(selector) ?
+                isVisible(selector) :
+                isVisible(document.querySelector(selector));
         },
         this.flags,
         "Expect " + selector + " to visible",
@@ -349,7 +430,9 @@ Assertion.prototype.html = function html(expectedHTML) {
     var selector = this.selector;
     var assertion = assert(
         function () {
-            return new RegExp(expectedHTML).test(document.querySelector(selector).innerHTML);
+            return isNode(selector) ?
+                new RegExp(expectedHTML).test(selector.innerHTML) :
+                new RegExp(expectedHTML).test(document.querySelector(selector).innerHTML);
         },
         this.flags,
         "Expect " + selector + " to be hidden",
@@ -358,7 +441,7 @@ Assertion.prototype.html = function html(expectedHTML) {
     this.scenario.pushAssert(assertion, "Expect node " + selector + " to have html " + expectedHTML);
 };
 
-Assertion.prototype.returnTrue = function (fn) {
+Assertion.prototype.returnTrue = function (fn, description) {
     var selector = this.selector;
     var assertion = assert(
         function () {
@@ -368,10 +451,10 @@ Assertion.prototype.returnTrue = function (fn) {
         "expect function " + fn + " to return true",
         "expect function " + fn + " to return false"
     );
-    this.scenario.pushAssert(assertion, "Expect function " + fn + " to be true");
+    this.scenario.pushAssert(assertion, description);
 };
 
-Assertion.prototype.returnFalse = function (fn) {
+Assertion.prototype.returnFalse = function (fn, description) {
     var selector = this.selector;
     var assertion = assert(
         function () {
@@ -381,7 +464,7 @@ Assertion.prototype.returnFalse = function (fn) {
         "expect function " + fn + " to return false",
         "expect function " + fn + " to return true"
     );
-    this.scenario.pushAssert(assertion, "Expect function " + fn + " to be false");
+    this.scenario.pushAssert(assertion, description);
 };
 
 module.exports = Asserter;
