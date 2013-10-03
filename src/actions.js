@@ -96,7 +96,12 @@ ClickAction.prototype = new Action();
 ClickAction.constructor = ClickAction;
 ClickAction.prototype._exec = function () {
     try {
-        document.querySelector(this.selector).click();
+        var selectedElem = document.querySelector(this.selector);
+        selectedElem.click();
+        var event = document.createEvent('MouseEvents');
+        event.initMouseEvent('mousedown', true, true,document.defaultView, 0, 0, 0, selectedElem.offsetTop, selectedElem.offsetLeft, false,
+         false, false, false, 1, null);
+        selectedElem.dispatchEvent(event);
     } catch (e) {
         throw new Error('Can\'t click on element: ' + this.selector, e);
     }

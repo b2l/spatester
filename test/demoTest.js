@@ -199,6 +199,28 @@ demoTestSuite.addTest("we should assert with function returning false", function
     });
 });
 
+demoTestSuite.addTest("scenario.click must trigger click and mousedown events", function (scenario, asserter) {
+    var clickInvoked = 0, mousedownInvoked = 0;
+    scenario.exec(function () {
+        document.getElementById('my-input').addEventListener('click', function() {
+            clickInvoked ++;
+        });
+        document.getElementById('my-input').addEventListener('mousedown', function() {
+            mousedownInvoked ++;
+        });
+    });
+    
+
+    scenario.click('#my-input');
+
+    asserter.assertTrue(function () {
+        return clickInvoked === 1;
+    }, "1 click expected, " + clickInvoked + " detected");
+    asserter.assertTrue(function () {
+        return mousedownInvoked === 1;
+    }, "1 mousedown expected, " + mousedownInvoked + " detected");
+});
+
 window.onload = function () {
     setTimeout(function () {
         demoTestSuite.run();

@@ -7,6 +7,10 @@ Asserter.prototype.expect = function assertThat(selector) {
     return new Assertion(selector, this.scenario, null, null);
 };
 
+Asserter.prototype.assertTrue = function assertTrue(fn, msg) {
+    return this.expect().to.returnTrue(fn, msg);
+};
+
 /**
  * test utility
  *
