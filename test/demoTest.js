@@ -138,7 +138,7 @@ demoTestSuite.addTest("test node exist", function (scenario, asserter) {
 demoTestSuite.addTest("test node is hidden ", function (scenario, asserter) {
 
     scenario.exec(function () {
-        document.getElementById('my-div').innerHTML = "<p>Toto, il y a du contenu dans ma div</p>"
+        document.getElementById('my-div').innerHTML = "<p>Toto, il y a du contenu dans ma div</p>";
     });
     asserter.expect('#my-div').not.to.be.hidden();
 
@@ -219,6 +219,57 @@ demoTestSuite.addTest("scenario.click must trigger click and mousedown events", 
     asserter.assertTrue(function () {
         return mousedownInvoked === 1;
     }, "1 mousedown expected, " + mousedownInvoked + " detected");
+});
+
+demoTestSuite.addTest("scenario.wait shall wait for a selector to be visible", function (scenario, asserter) {
+
+    // Given 
+
+    scenario.exec(function () {
+        var myDiv = document.getElementById('my-div');
+        myDiv.innerHTML = "click me";
+        myDiv.addEventListener('click', function(e) {
+            setTimeout(function() {
+                e.target.classList.add('clicked');
+            }, 200);
+        });
+    });
+
+    // When
+    scenario.click("#my-div");
+
+    // Then
+    scenario.wait("#my-div.clicked");
+    asserter.expect("#my-div.clicked").to.exist();
+
+
+});
+
+demoTestSuite.addTest("scenario.wait shall wait for a function to return true", function (scenario, asserter) {
+
+    // Given 
+
+    scenario.exec(function () {
+        var myDiv = document.getElementById('my-div');
+        myDiv.innerHTML = "click me";
+        myDiv.addEventListener('click', function(e) {
+            setTimeout(function() {
+                e.target.classList.add('clicked');
+            }, 200);
+        });
+    });
+
+    // When
+    scenario.click("#my-div");
+
+    // Then
+    scenario.wait(function() {
+        var myDiv = document.getElementById('my-div');
+        return myDiv.classList.contains("clicked");
+    });
+    asserter.expect("#my-div.clicked").to.exist();
+
+
 });
 
 window.onload = function () {

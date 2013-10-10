@@ -78,5 +78,5 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', ['jshint', 'bumpup']);
     grunt.registerTask('dev', ['browserify', 'watch']);
     grunt.registerTask('test', ['browserify', 'testem:ci:spa', 'testem:ci:qunit']);
-    grunt.registerTask('default', ['watch']);
+    grunt.registerTask('default', ['browserify', 'watch']);
 };

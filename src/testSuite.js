@@ -35,7 +35,6 @@ TestSuite.prototype.addTest = function (name, test) {
 
     this.tests.push(test);
 
-
     this.scenario._actions.push(new actions.ExecAction(this.setUp));
     test.call(this, this.scenario, this.asserter);
     this.scenario._actions.push(new actions.ExecAction(this.tearDown));

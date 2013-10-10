@@ -27,17 +27,34 @@ Action.prototype = {
  * WaitAction class
  * @extend Action
  *
- * Delay the execution until the given selector is found in the DOM
+ * Parameter could be either :
+ * - a function, in this case delay the execution until the function returns true
+ * - a selector, in this case delay the execution until the given selector is found in the DOM
  */
-function WaitAction(selector, callerLine) {
-    this.waitFor = function () {
-        var res = document.querySelector(selector);
+function WaitAction(parameter, callerLine) {
+
+    var handleRes = function(res) {
         if (!res) {
-            throw new Error();
+            var error = new Error();
+            error.type="waitfor";
+            throw error;
         }
         return res;
     };
-    this.name = "Wait for an element matching the selector " + selector;
+    
+    if(typeof parameter === 'function') {
+        this.waitFor = function() {
+            return handleRes(parameter.apply());
+        };
+        this.name = "Wait for the function " + parameter +" to return true";
+    } else {
+        this.waitFor = function() {
+            return handleRes(document.querySelector(parameter));
+        };
+        this.name = "Wait for an element matching the selector " + parameter;
+    }
+
+    
     this.callerLine = callerLine;
 }
 WaitAction.prototype = new Action();

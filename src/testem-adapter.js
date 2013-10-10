@@ -29,6 +29,7 @@ function init(testemSocket) {
         var testResult = testemTestResult.call(this, action, e, false);
         testemSocket.emit('test-result', testResult);
         testemSocket.emit('error', [this.scenario.currentTest, e.message, "Stack ", action.callerLine].join('\n'));
+        testemSocket.emit('all-test-results', results);
 
     };
 

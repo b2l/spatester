@@ -148,6 +148,7 @@ Scenario.prototype = {
         if (this.verbose) {
             console.log(action.toString());
         }
+
         setTimeout(function timeout() {
             try {
                 if (this.verbose) {
@@ -156,13 +157,20 @@ Scenario.prototype = {
                 action.waitFor();
                 scenario._process(index + 1);
             } catch (e) {
-                if (new Date().getTime() - start > this.timeout) {
-                    if (this.verbose) {
-                        console.log("Wait for timeout");
+                if("waitfor" === e.type) {
+                    if (new Date().getTime() - start > this.timeout) {
+                        if (this.verbose) {
+                            console.log("Wait for timeout");
+                        }
+                        this._onError(scenario, index, action, e);
+                    } else {
+                        if (this.verbose) {
+                            console.log("Wait more");
+                        }
+                        setTimeout(timeout.bind(this), 100);
                     }
-                    this._onError(scenario, index, action, e);
                 } else {
-                    setTimeout(timeout, 100);
+                    this._onError(scenario, index, action, e);
                 }
             }
         }.bind(this), 200);
