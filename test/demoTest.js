@@ -78,7 +78,7 @@ demoTestSuite.addTest("test node contains text ", function (scenario, asserter) 
 demoTestSuite.addTest("test form radio is checked", function (scenario, asserter) {
     // Given
     scenario.exec(function () {
-        var content = "<input type='radio' value='toto' id='not-checked' /> <input tpye='radio' value='titi' id='checked' checked='checked' />";
+        var content = "<input type='chec' value='toto' id='not-checked' /> <input tpye='radio' value='titi' id='checked' checked='checked' />";
         document.getElementById('my-div').innerHTML = content;
     });
 
@@ -128,6 +128,7 @@ demoTestSuite.addTest("test node exist", function (scenario, asserter) {
     asserter.expect('#my-div').to.exist();
 
     scenario.exec(function () {
+        // Create the element, but don't insert it in the dom
         var elem = document.createElement('div');
         elem.setAttribute('id', 'not-in-dom');
     });

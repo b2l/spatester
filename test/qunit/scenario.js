@@ -40,7 +40,7 @@ asyncTest("wait on existing element", function() {
         });
         scenario.wait("#my-div");
 
-        asserter.expect("#my-div").to.have.text('');
+        asserter.expect("#my-div").to.exist();
     });
 
     // When
@@ -71,79 +71,9 @@ asyncTest("wait on unexisting element", function() {
 
     demoTestSuite.addTest("test wait for unexisting element", function(scenario, asserter) {
         scenario.wait("#my-div2");
-        asserter.expect("#my-div2").to.have.text('');
+        asserter.expect("#my-div2").not.to.exist();
     });
 
     // When
     demoTestSuite.run();
-});
-
-asyncTest("Scenario.exec with error should emit an error message ", function() {
-
-    // Then
-    TestSuite.prototype.onTestExecError = function() {
-        ok(true, "Error event has been caught" );
-        start();
-    };
-
-    TestSuite.prototype.onTestSuccess = function() {
-        ok(false, "Unexpected test-sucess event has been caught" );
-        start();
-    };
-
-    // Given
-    var demoTestSuite = new TestSuite("demo test suite", {
-        setUp: function() {
-        },
-        tearDown: function() {
-        },
-        timeout: 100
-    });
-
-    demoTestSuite.addTest("test wait for unexisting element", function(scenario, asserter) {
-        scenario.exec(function() {
-            document.querySelector('#unknown-element').setAttribute('title', 'toto');
-        });
-
-        asserter.expect('body').to.have.attr('title');
-    });
-
-    // When
-    demoTestSuite.run();
-});
-
-
-asyncTest("Scenario.* with error (unexisting node) should emit an error message", function() {
-
-    // Then
-    TestSuite.prototype.onTestExecError = function() {
-        ok(true, "Error event has been caught" );
-        start();
-    };
-
-    TestSuite.prototype.onTestSuccess = function() {
-        ok(false, "Unexpected test-sucess event has been caught. En error should have been throw before !" );
-        start();
-    };
-
-    // Given
-    var demoTestSuite = new TestSuite("demo test suite", {
-        setUp: function() {
-        },
-        tearDown: function() {
-        },
-        timeout: 100
-    });
-
-    demoTestSuite.addTest("test wait for unexisting element", function(scenario, asserter) {
-        // Click on a node which is not in the dom
-        scenario.click('#another-div');
-
-        // An error should have interrupt the test before we arrive here
-        asserter.expect('body').to.have.attr('title');
-    });
-
-    // When
-    demoTestSuite.run();
-
 });
