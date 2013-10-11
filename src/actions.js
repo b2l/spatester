@@ -157,12 +157,13 @@ actions.DoubleClickAction = DoubleClickAction;
  *
  * Keyboard action on a given selector
  */
-function KeyboardAction(selector, action, chromeCode, ffCode, shiftKeyArg, callerLine) {
+function KeyboardAction(selector, action, chromeCode, ffCode, shiftKeyArg, ctrlKeyArg, callerLine) {
     this.selector = selector;
     this.action = action;
     this.chromeCode = chromeCode;
     this.ffCode = ffCode;
     this.shiftKeyArg = shiftKeyArg ? shiftKeyArg : false;
+    this.ctrlKeyArg = ctrlKeyArg ? ctrlKeyArg : false;
     this.name = action + " on element matching selector " + selector;
     this.callerLine = callerLine;
 }
@@ -174,7 +175,7 @@ KeyboardAction.prototype._exec = function () {
         if (event.initKeyboardEvent) {  // Chrome, IE
             event.initKeyboardEvent(this.action, true, true, document.defaultView, this.chromeCode, 0, "", false, "");
         } else { // FF
-            event.initKeyEvent(this.action, true, true, document.defaultView, false, false, this.shiftKeyArg, false, this.ffCode, 0);
+            event.initKeyEvent(this.action, true, true, document.defaultView, this.ctrlKeyArg, false, this.shiftKeyArg, false, this.ffCode, 0);
         }
         document.querySelector(this.selector).dispatchEvent(event);
     } catch (e) {
