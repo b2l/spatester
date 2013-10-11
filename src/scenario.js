@@ -21,9 +21,9 @@ Scenario.prototype = {
         this._actions.push(new actions.DoubleClickAction(selector, callerLine));
         return this;
     },
-    keyboard: function (selector, action, chromeCode, ffCode, shiftKeyArg) {
+    keyboard: function (selector, action, chromeCode, ffCode, shiftKeyArg, ctrlKeyArg) {
         var callerLine = this._getCallerLine(new Error());
-        this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, shiftKeyArg, callerLine));
+        this._actions.push(new actions.KeyboardAction(selector, action, chromeCode, ffCode, shiftKeyArg, ctrlKeyArg, callerLine));
         return this;
     },
     // Feature detection - soit faire en sorte que scenario.keyboard marche bien tout le temps, soit fournir une api de feature detection
