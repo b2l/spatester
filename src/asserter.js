@@ -98,10 +98,11 @@ function Assertion(selector, scenario, flag, parent) {
 }
 
 Assertion.prototype.execAssertion = function (assertion, description) {
-    if (this.scenario)
+    if (this.scenario) {
         this.scenario.pushAssert(assertion, description);
-    else
+    } else {
         assertion();
+    }
 };
 
 function isNode(selector) {
@@ -138,7 +139,7 @@ Assertion.prototype.nodeLength = function nodeLength(expectedLength, description
         "Expect " + selector + " NOT to match " + expectedLength + " node in the DOM"
     );
 
-    this.execAssertion(assertion, description)
+    this.execAssertion(assertion, description);
 };
 
 /**
@@ -160,7 +161,7 @@ Assertion.prototype.className = function (className, description) {
         'Expect ' + selector + ' to have class "' + className + '"',
         'Expect ' + selector + ' not to have class "' + className + '"'
     );
-    this.execAssertion(assertion, description)
+    this.execAssertion(assertion, description);
 };
 
 /**
@@ -202,7 +203,7 @@ Assertion.prototype.attr = function (attrName, expected, description) {
             "Expect " + selector + " not to have attribute " + attrName
         );
     }
-    this.execAssertion(assertion, description)
+    this.execAssertion(assertion, description);
 };
 
 /**
@@ -481,7 +482,7 @@ Assertion.prototype.returnTrue = function (fn, description) {
         "expect function " + fn + " to return true",
         "expect function " + fn + " to return false"
     );
-    this.execAssertion(assertion, description)
+    this.execAssertion(assertion, description);
 };
 
 /**
@@ -502,7 +503,7 @@ Assertion.prototype.returnFalse = function (fn, description) {
         "expect function " + fn + " to return false",
         "expect function " + fn + " to return true"
     );
-    this.execAssertion(assertion, description)
+    this.execAssertion(assertion, description);
 };
 
 module.exports = Asserter;
