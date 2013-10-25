@@ -28,6 +28,7 @@ test :
     html(expectedHTML) => check si le noeud contient le code html en paramètre
     true(fn) => appel la function, passe si elle renvoie true
     false(fn) => appel la function, passe si elle renvoie false
+    nodeLength(expectedNodeLength) => Nombre d'element matchant le selecteur
 
     les fonctions appelé par true et false recevront en paramètre
         selector => le selector passé a "expect"
